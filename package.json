@@ -1,0 +1,23 @@
+{
+  "name": "form",
+  "version": "0.1.0",
+  "description": "可配置的通用表单组件",
+  "main": "src/index.vue",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.vmic.xyz:game-fed/form.git"
+  },
+  "keywords": [
+    "form",
+    "vue",
+    "element-ui"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
+}
