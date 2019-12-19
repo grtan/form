@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style.root">
+  <div class="fm-address__root">
     <el-cascader
       v-model="address"
       :options="data"
@@ -20,17 +20,19 @@
   </div>
 </template>
 
-<style lang="less" module>
-.root {
-  :global(.el-cascader) {
-    > :global(.el-input) {
-      width: 50%;
-      min-width: 300px;
+<style lang="less">
+.fm-address {
+  &__root {
+    .el-cascader {
+      > .el-input {
+        width: 50%;
+        min-width: 300px;
+      }
     }
-  }
 
-  :global(.el-textarea) {
-    margin-top: 15px;
+    .el-textarea {
+      margin-top: 15px;
+    }
   }
 }
 </style>
@@ -49,14 +51,14 @@ export default {
       type: Array
     }
   },
-  data () {
+  data() {
     return {
       data
     }
   },
   computed: {
     address: {
-      get () {
+      get() {
         const value = this.value || []
 
         return value.slice(0, {
@@ -66,7 +68,7 @@ export default {
           detail: 3
         }[this.schema.format])
       },
-      set (address) {
+      set(address) {
         const value = [...address]
 
         this.schema.format === 'detail' && value.push(this.detail)
@@ -74,10 +76,10 @@ export default {
       }
     },
     detail: {
-      get () {
+      get() {
         return (this.value && this.value[3]) || ''
       },
-      set (detail) {
+      set(detail) {
         const value = [...this.value]
 
         value[3] = detail

@@ -1,11 +1,16 @@
 <template>
-  <el-link v-if="schema.readonly" :href="value" target="_blank">{{value}}</el-link>
+  <el-link v-if="schema.readonly" class="fm-file__root" :href="value" target="_blank">{{value}}</el-link>
   <el-upload
     v-else
-    :class="$style.root"
+    class="fm-file__root"
     ref="upload"
     :action="schema.action"
+    :name="schema.name"
+    :headers="schema.headers"
+    :with-credentials="schema.withCredentials"
+    :accept="schema.accept"
     :file-list="list"
+    :before-upload="onBeforeUpload"
     :on-success="onSuccess"
     :on-remove="onDelete"
   >
@@ -13,18 +18,20 @@
   </el-upload>
 </template>
 
-<style lang="less" module>
-.root {
-  :global(.el-upload) {
-    float: left;
-  }
+<style lang="less">
+.fm-file {
+  &__root {
+    .el-upload {
+      float: left;
+    }
 
-  :global(.el-upload-list) {
-    margin-left: 100px;
-    height: 32px;
+    .el-upload-list {
+      margin-left: 100px;
+      height: 32px;
 
-    :global(.el-upload-list__item) {
-      margin-top: 0 !important;
+      .el-upload-list__item {
+        margin-top: 0 !important;
+      }
     }
   }
 }
@@ -34,28 +41,42 @@
 export default {
   props: {
     schema: {
-      type: Object,
-      required: true
+      required: true,
+      type: Object
     },
     value: {
-      required: true
+      required: true,
+      type: String
     }
   },
-  data () {
+  data() {
     return {
       list: []
     }
   },
   methods: {
-    onSuccess (res, file) {
+    onValidateFail(reason) {
+      reason && this.$emit('input', `validate:${reason}`)
+    },
+    onBeforeUpload(file) {
+      if (typeof this.schema.fileValidator !== 'function') {
+        return
+      }
+
+      // 检验失败后不会上传文件
+      return this.schema.fileValidator(file, this.onValidateFail)
+    },
+    onSuccess(res, file) {
+      const url = this.schema.urlFetcher(file.response)
+
       this.$refs.upload.clearFiles()
       this.list = [{
         name: file.name,
-        url: file.response.data.url || 'xxxx'
+        url
       }]
-      this.$emit('input', file.response.data.url || 'xxxx')
+      this.$emit('input', url)
     },
-    onDelete () {
+    onDelete() {
       this.$emit('input', '')
     }
   }

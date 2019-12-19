@@ -2,7 +2,7 @@
   <el-form
     v-if="!hidden"
     ref="form"
-    :class="[$style.container,{[$style.root]:isRoot,[$style.combined]:!isBase}]"
+    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase}]"
     :label-width="`${isBase?labelWidth:0}px`"
     :model="model"
     :rules="rules"
@@ -11,222 +11,215 @@
     :inline-message="true"
     @validate="onValidate"
   >
-    <el-form-item :label="isBase?schema.title:''" prop="value" ref="formitem">
+    <el-form-item :label="isBase?schema.title:''" prop="value">
       <!-- 对象 -->
       <template v-if="schema.type==='object'">
-        <el-collapse v-if="value" :class="{[$style.root]:isRoot}" :value="['1']">
+        <el-collapse v-if="value" :class="{'fm-item--root':isRoot}" :value="['1']">
           <el-collapse-item name="1" :disabled="isRoot">
-            <div :class="$style.header" slot="title">
+            <div class="fm-item__header" slot="title">
               <el-row type="flex" justify="space-between">
                 <el-col :span="15">
-                  <span :class="$style.label" :style="{width:`${labelWidth}px`}">{{schema.title}}</span>
-                  <span v-if="schema.description" :class="$style.description">{{schema.description}}</span>
+                  <span
+                    class="fm-item__label"
+                    :style="{width:`${labelWidth}px`}"
+                    :data-required="required?'*':''"
+                  >{{schema.title}}</span>
+                  <span
+                    v-if="schema.description"
+                    class="fm-item__description"
+                  >{{schema.description}}</span>
                 </el-col>
-                <el-col v-if="error" :class="$style.error" :span="7">{{error}}</el-col>
+                <el-col v-if="error" class="fm-item__error" :span="7">{{error}}</el-col>
               </el-row>
             </div>
-            <!-- 这里用schema.properties来迭代，是为了保证属性的顺序一致 -->
-            <template v-for="(propSchema,prop) in schema.properties">
-              <v-item
-                v-if="value.hasOwnProperty(prop)"
-                v-model="value[prop]"
-                ref="objectChildren"
-                :key="prop"
-                :schema="propSchema"
-                :required="schema.required&&schema.required.includes(prop)||propSchema.type==='array'&&!!propSchema.minItems"
-                :root-value="rootData"
-                @validate="onObjectValidate(prop,$event)"
-              ></v-item>
-            </template>
+            <component
+              ref="object"
+              :is="typeof schema.component==='function'?schema.component():'v-object'"
+              :schema="schema"
+              :value="value"
+              :root-value="rootData"
+              @validate="$set(validateResult.properties, ...arguments)"
+              @destroy="$delete(validateResult.properties,$event)"
+            ></component>
           </el-collapse-item>
         </el-collapse>
       </template>
 
       <!-- 数组 -->
       <template v-else-if="schema.type==='array'">
-        <el-collapse v-if="value" :class="{[$style.root]:isRoot}" :value="['1']">
+        <el-collapse v-if="value" :class="{'fm-item--root':isRoot}" :value="['1']">
           <el-collapse-item name="1" :disabled="isRoot">
-            <div :class="$style.header" slot="title">
+            <div class="fm-item__header" slot="title">
               <el-row type="flex" justify="space-between">
                 <el-col :span="12">
-                  <span :class="$style.label" :style="{width:`${labelWidth}px`}">{{schema.title}}</span>
-                  <span v-if="schema.description" :class="$style.description">{{schema.description}}</span>
+                  <span
+                    class="fm-item__label"
+                    :style="{width:`${labelWidth}px`}"
+                    :data-required="required?'*':''"
+                  >{{schema.title}}</span>
+                  <span
+                    v-if="schema.description"
+                    class="fm-item__description"
+                  >{{schema.description}}</span>
                 </el-col>
-                <el-col v-if="error" :class="$style.error" :span="8">{{error}}</el-col>
-                <el-col :class="$style.add" :span="4">
-                  <el-button type="primary" @click.stop="addItem">新增</el-button>
+                <el-col v-if="error" class="fm-item__error" :span="8">{{error}}</el-col>
+                <el-col v-if="typeof schema.component!=='function'" class="fm-item__add" :span="4">
+                  <el-button type="primary" @click.stop="$refs.array.onAdd">新增</el-button>
                 </el-col>
               </el-row>
             </div>
-            <el-row v-for="(item,index) in value" :key="index" type="flex" justify="space-between">
-              <el-col :span="20">
-                <v-item
-                  ref="arrayChildren"
-                  :schema="schema.items"
-                  :value="value[index]"
-                  :root-value="rootData"
-                  @input="$event!==value[index]&&$set(value,index,$event)"
-                  @validate="onArrayValidate(index,$event)"
-                ></v-item>
-              </el-col>
-              <el-col :class="$style.delete" :span="3">
-                <el-button type="danger" @click="deleteItem(index)">删除</el-button>
-              </el-col>
-            </el-row>
+            <component
+              ref="array"
+              :is="typeof schema.component==='function'?schema.component():'v-array'"
+              :schema="schema"
+              :value="value"
+              :root-value="rootData"
+              @validate="$set(validateResult.items, ...arguments)"
+              @destroy="validateResult.items.splice($event, 1)"
+            ></component>
           </el-collapse-item>
         </el-collapse>
       </template>
 
       <!-- 基本类型、地址、时间范围 -->
-      <div v-else :class="$style.content">
+      <div v-else class="fm-item__content">
         <component
           :is="typeof schema.component==='function'?schema.component():'v-base'"
           :schema="schema"
           :value="value"
           @input="$listeners.input"
         ></component>
-        <!-- <v-base v-else :schema="schema" :value="value" @input="$listeners.input"></v-base> -->
-        <div :class="$style.description" v-if="schema.description">{{schema.description}}</div>
+        <div class="fm-item__description--content" v-if="schema.description">{{schema.description}}</div>
       </div>
     </el-form-item>
   </el-form>
 </template>
 
-<style lang="less" module>
-.container {
-  &.combined {
-    &:not(.root) {
-      margin: 5px 5px 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      overflow: hidden;
+<style lang="less">
+.fm-item {
+  &__root {
+    &.fm-item--combined {
+      &:not(.fm-item--root) {
+        margin: 5px 5px 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
 
-      & + .container {
-        margin-top: 25px;
-      }
-    }
-
-    > :global(.el-form-item) {
-      margin-bottom: 0;
-    }
-  }
-
-  :global(.el-collapse) {
-    border: none;
-
-    :global(.el-collapse-item.is-disabled) {
-      > div {
-        > :global(.el-collapse-item__header) {
-          cursor: default;
-
-          :global(.el-collapse-item__arrow) {
-            display: none;
-          }
+        & + .fm-item__root {
+          margin-top: 25px;
         }
       }
-    }
 
-    :global(.el-collapse-item__header) {
-      border-bottom-color: #ebeef5;
-      margin-bottom: 1em;
-      padding: 0.2em 0;
-      height: auto;
-      color: inherit;
-      font-size: inherit;
-      line-height: inherit;
-      cursor: pointer;
-    }
-
-    .header {
-      flex: auto;
-      font-weight: normal;
-
-      .label {
-        display: inline-block;
-        box-sizing: border-box;
-        padding-right: 12px;
-        text-align: right;
-      }
-
-      .description {
-        font-size: 0.8em;
-        font-weight: bold;
-      }
-
-      .error {
-        color: #f56c6c;
-      }
-
-      .add {
-        padding-right: 20px;
-        text-align: right;
+      > .el-form-item {
+        margin-bottom: 0;
       }
     }
 
-    .delete {
-      padding-right: 42px;
-      text-align: right;
-    }
-
-    &:not(.root) {
-      > :global(.el-collapse-item) {
-        > :global(.el-collapse-item__wrap) {
-          > :global(.el-collapse-item__content) {
-            margin-left: 2em;
-            font-size: inherit;
-          }
-        }
-      }
-    }
-
-    :global(.el-collapse-item__wrap) {
+    .el-collapse {
       border: none;
 
-      :global(.el-collapse-item__content) {
-        padding-bottom: 0;
+      .el-collapse-item.is-disabled {
+        > div {
+          > .el-collapse-item__header {
+            cursor: default;
+
+            .el-collapse-item__arrow {
+              display: none;
+            }
+          }
+        }
       }
+
+      .el-collapse-item__header {
+        border-bottom-color: #ebeef5;
+        margin-bottom: 1em;
+        padding: 0.2em 0;
+        height: auto;
+        color: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        cursor: pointer;
+      }
+
+      &:not(.fm-item--root) {
+        > .el-collapse-item {
+          > .el-collapse-item__wrap {
+            > .el-collapse-item__content {
+              margin-left: 2em;
+              font-size: inherit;
+            }
+          }
+        }
+      }
+
+      .el-collapse-item__wrap {
+        border: none;
+
+        .el-collapse-item__content {
+          padding-bottom: 0;
+        }
+      }
+    }
+
+    .el-form-item__error--inline {
+      box-sizing: border-box;
+      margin-left: 0;
+      padding-left: 1em;
+      width: 30%;
     }
   }
 
-  .content {
-    float: left;
-    width: 70%;
+  &__header {
+    flex: auto;
+    font-weight: normal;
+  }
 
-    .description {
+  &__label {
+    display: inline-block;
+    box-sizing: border-box;
+    padding-right: 12px;
+    text-align: right;
+
+    &::before {
+      content: attr(data-required);
+      margin-right: 4px;
+      color: #f56c6c;
+    }
+  }
+
+  &__description {
+    font-size: 0.8em;
+    font-weight: bold;
+
+    &--content {
       margin-top: 0.6em;
-      font-size: 0.8em;
-      font-weight: bold;
       line-height: 1;
     }
   }
 
-  :global(.el-form-item__error--inline) {
-    box-sizing: border-box;
-    margin-left: 0;
-    padding-left: 1em;
-    width: 30%;
+  &__error {
+    color: #f56c6c;
+  }
+
+  &__add {
+    padding-right: 20px;
+    text-align: right;
+  }
+
+  &__content {
+    float: left;
+    width: 70%;
   }
 }
 </style>
 
 <script>
-import VBase from './base.vue'
+import Big from 'big.js'
+import VObject from './object'
+import VArray from './array'
+import VBase from './base'
 
-const noop = function () { }
-
-function ajax(url) {
-  return new Promise(function (resolve) {
-    setTimeout(function () {
-      resolve([{
-        name: 'name1',
-        value: 'value1'
-      }, {
-        name: 'name2',
-        value: 'value2'
-      }])
-    }, 1000)
-  })
-}
+function noop() { }
 
 /**
  * 遍历校验结果并过滤掉一些无用数据
@@ -293,17 +286,9 @@ function travel(item = {}, valid = true) {
 export default {
   name: 'v-item',
   components: {
+    VObject,
+    VArray,
     VBase
-  },
-  provide() {
-    return this.immediateValidate === undefined ? {
-      immediateValidate: this.validateOnInit
-    } : {}
-  },
-  inject: {
-    immediateValidate: {
-      default: undefined
-    }
   },
   props: {
     schema: {
@@ -317,10 +302,6 @@ export default {
       default: undefined
     },
     required: { // 是否必填
-      type: Boolean,
-      default: false
-    },
-    validateOnInit: { // 初始化时是否校验
       type: Boolean,
       default: false
     },
@@ -345,9 +326,6 @@ export default {
     rootData() { // 根组件数据（即整个表单的数据）
       // 根组件最初是没有rootValue的
       return this.rootValue || this.value
-    },
-    initValidate() { // 初始化时是否校验
-      return this.immediateValidate === undefined ? this.validateOnInit : this.immediateValidate
     },
     hidden() { // 当前组件是否需要隐藏
       return this.isHidden(this.schema)
@@ -428,15 +406,6 @@ export default {
           data = this.validateResult || {
             properties: {}
           }
-
-          // 如果对象的某个属性被隐藏时，从对象中删除该属性
-          Object.keys(schema.properties).forEach(prop => {
-            const hidden = this.isHidden(schema.properties[prop])
-
-            if (hidden && data.properties.hasOwnProperty(prop)) {
-              this.$delete(data.properties, prop)
-            }
-          })
           break
         case 'array':
           data = this.validateResult || {
@@ -455,32 +424,29 @@ export default {
       }
     },
     rules() { // 校验规则
-      const { type, format, message, pattern, minLength, maxLength, minimum, maximum, minItems, maxItems, validator } = this.schema
+      const {
+        type,
+        format,
+        message,
+        pattern,
+        minLength,
+        maxLength,
+        minimum,
+        maximum,
+        multipleOf,
+        minItems,
+        maxItems,
+        uniqueItems,
+        validator
+      } = this.schema
       const rules = {
         value: []
-      }
-
-      // 定义了校验函数
-      if (typeof validator === 'function') {
-        rules.value.push({
-          validator(rule, value, callback) {
-            validator(value, callback)
-          }
-        })
       }
 
       this.required && rules.value.push({
         type,
         required: true,
         message: '输入不能为空'
-        // trigger: 'change'
-      })
-
-      !!pattern && rules.value.push({
-        type,
-        pattern,
-        message: message || '请输入正确的格式'
-        // trigger: 'change'
       })
 
       switch (true) {
@@ -490,7 +456,6 @@ export default {
               type,
               min: minLength,
               message: `不能少于${minLength}个字符`
-              // trigger: 'change'
             })
           }
 
@@ -499,7 +464,19 @@ export default {
               type,
               max: maxLength,
               message: `不能超过${maxLength}个字符`
-              // trigger: 'change'
+            })
+          }
+
+          // 文件校验
+          if (['image', 'video', 'file'].includes(format)) {
+            rules.value.push({
+              validator(rule, value, callback) {
+                if (value.startsWith('validate:')) {
+                  callback(new Error(value.replace(/^validate\:/, '')))
+                } else {
+                  callback()
+                }
+              }
             })
           }
 
@@ -510,7 +487,6 @@ export default {
               type,
               min: minimum,
               message: `不能小于${minimum}`
-              // trigger: 'change'
             })
           }
 
@@ -519,7 +495,18 @@ export default {
               type,
               max: maximum,
               message: `不能大于${maximum}`
-              // trigger: 'change'
+            })
+          }
+
+          if (typeof multipleOf === 'number') {
+            rules.value.push({
+              validator(rule, value, callback) {
+                if (new Big(value).mod(multipleOf).toString() !== '0') {
+                  callback(new Error(`请输入${multipleOf}的倍数`))
+                } else {
+                  callback()
+                }
+              }
             })
           }
           break
@@ -552,7 +539,7 @@ export default {
               rules.value.push({
                 validator(rule, value, callback) {
                   if (!value[3] || value[3].length < minLength) {
-                    return callback(new Error(`详细地址最少输入${minLength}个字符`))
+                    return callback(new Error(`地址详情最少输入${minLength}个字符`))
                   }
 
                   callback()
@@ -564,7 +551,7 @@ export default {
               rules.value.push({
                 validator(rule, value, callback) {
                   if (value[3] && value[3].length > maxLength) {
-                    return callback(new Error(`详细地址最多输入${maxLength}个字符`))
+                    return callback(new Error(`地址详情最多输入${maxLength}个字符`))
                   }
 
                   callback()
@@ -578,9 +565,6 @@ export default {
           if (typeof minItems === 'number') {
             rules.value.push({
               type,
-              // ...(!minItems ? {} : {
-              //   required: true
-              // }),
               min: minItems,
               message: `不能少于${minItems}个元素`
             })
@@ -593,41 +577,84 @@ export default {
               message: `不能超过${maxItems}个元素`
             })
           }
+
+          rules.value.push({
+            validator(rule, value, callback) {
+              const list = []
+              let keyGenerator
+
+              switch (true) {
+                case uniqueItems instanceof Array:
+                  keyGenerator = function (item) {
+                    const key = []
+
+                    uniqueItems.forEach(function (name) {
+                      key.push(item[name])
+                    })
+
+                    return JSON.stringify(key)
+                  }
+                  break
+                case typeof uniqueItems === 'function':
+                  keyGenerator = function (item) {
+                    return uniqueItems(item)
+                  }
+                  break
+                case !!uniqueItems:
+                  keyGenerator = function (item) {
+                    return JSON.stringify(item)
+                  }
+                  break
+              }
+
+              if (keyGenerator && value.some(function (item) {
+                const key = keyGenerator(item)
+                const exist = list.includes(key)
+
+                list.push(key)
+
+                return exist
+              })) {
+                return callback(new Error('包含重复元素'))
+              }
+
+              callback()
+            }
+          })
+
           break
+      }
+
+      // 自定义校验函数
+      if (typeof validator === 'function') {
+        rules.value.push({
+          validator(rule, value, callback) {
+            validator(value, callback)
+          }
+        })
       }
 
       return rules
     }
   },
   watch: {
-    value: {
-      immediate: true,
-      handler() {
-        // 如果初始化时不校验
-        if (!this.initValidate && !this.canValidate) {
-          return
-        }
-
-        // 同一个事件循环中只触发一次，同时也是确保组件元素被渲染、this.value为最终值后再进行校验
-        if (this.formValidated) {
-          return
-        }
-
-        this.formValidated = true
-        this.$nextTick(function () {
-          this.formValidated = false
-          /**
-           * 这里为什么不在watch fixedValue里调用，是因为computed属性只要返回对象，不管属性值有没有变化都一定会触发watch
-           */
-          this.$refs.form && this.$refs.form.validate(noop)
-        })
-      }
-    },
     fixedValue: {
       immediate: true,
       handler(value, oldValue) {
-        this.$emit('input', value)
+        // computed属性只要返回对象，不管值有没有变化都一定会触发watch
+        value !== oldValue && this.$emit('input', value)
       }
+    },
+    value() {
+      // 确保this.value初始化后再进行校验
+      if (!this.canValidate) {
+        return
+      }
+
+      /**
+       * 这里为什么不在watch fixedValue里调用，是因为computed属性只要返回对象，不管值有没有变化都一定会触发watch
+       */
+      this.$refs.form && this.$refs.form.validate(noop)
     },
     fixedValidateResult: {
       immediate: true,
@@ -635,32 +662,9 @@ export default {
         this.validateResult = value
       }
     },
-    validateResult: {
-      deep: true,
-      handler(value) {
-        if (this.rootValue) { // 非根组件
-          return this.$emit('validate', value)
-        }
-
-        /**
-         * 同一个事件循环中只会触发一次validate事件
-         * 由于watch value中使用了$nextTick，这里必须嵌套3层$nextTick才行，否则如果同时修改了value和validateResult，会触发两次事件
-         * 上面的特殊情况指的是删除数组元素时
-         */
-        if (this.validateEmitted) {
-          return
-        }
-
-        this.validateEmitted = true
-        this.$nextTick(function () {
-          this.$nextTick(function () {
-            this.$nextTick(function () {
-              this.validateEmitted = false
-              this.$emit('validate', travel(this.validateResult).reverse())
-            })
-          })
-        })
-      }
+    validateResult(value) {
+      // 非根组件
+      !this.isRoot && this.$emit('validate', value)
     }
   },
   created() {
@@ -673,20 +677,21 @@ export default {
       const expression = schema.hidden
       let hidden
 
-      // 基本类型
-      if (typeof expression !== 'string') {
-        hidden = !!expression
-      } else {
-        try {
+      try {
+        if (typeof expression === 'string') {
           // 必须要将this.rootData的影响范围降到最小，否则rootData被修改后所有字段的fixedValue都要重新计算
           // eslint-disable-next-line no-unused-vars
-          const data = this.rootData
+          const data = JSON.parse(JSON.stringify(this.rootData))
 
           // eslint-disable-next-line no-eval
-          hidden = eval(expression)
-        } catch (e) {
-          hidden = false
+          hidden = !!eval(expression)
+        } else if (typeof expression === 'function') {
+          hidden = !!expression(JSON.parse(JSON.stringify(this.rootData)))
+        } else {
+          hidden = !!expression
         }
+      } catch (e) {
+        hidden = false
       }
 
       if (hidden) {
@@ -708,35 +713,23 @@ export default {
 
       return hidden
     },
-    addItem() {
-      this.value.push(undefined)
-    },
-    deleteItem(index) {
-      this.value.splice(index, 1)
-      this.validateResult.items.splice(index, 1)
-    },
     onValidate(...args) {
       this.error = args[2] || ''
       this.$set(this.validateResult, 'valid', args[1])
       this.$set(this.validateResult, 'message', args[2] || '')
     },
-    onObjectValidate(prop, result) {
-      this.$set(this.validateResult.properties, prop, result)
-    },
-    onArrayValidate(index, result) {
-      this.$set(this.validateResult.items, index, result)
-    },
     validate(callback) { // 校验整个表单
       this.$refs.form.validate(noop)
-        ;[...(this.$refs.objectChildren || []), ...(this.$refs.arrayChildren || [])].forEach(function (child) {
-          child.validate()
-        })
-
+      this.$refs.object && this.$refs.object.validate()
+      this.$refs.array && this.$refs.array.validate()
       // 根组件
-      !this.rootValue && this.$nextTick(function () {
-        callback(travel(this.validateResult).reverse())
+      this.isRoot && this.$nextTick(function () {
+        callback(...travel(this.validateResult).reverse())
       })
     }
+  },
+  beforeDestroy() {
+    this.$emit('destroy')
   }
 }
 </script>

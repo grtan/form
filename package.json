@@ -18,6 +18,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "big.js": "^5.2.2",
     "moment": "^2.24.0"
+  },
+  "peerDependencies": {
+    "element-ui": "^2.13.0",
+    "vue": "^2.6.10"
   }
 }

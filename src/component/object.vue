@@ -1,16 +1,17 @@
 <template>
-  <div :class="$style.root">
-    <!-- 这里用schema.properties来迭代，是为了保证属性的顺序一致 -->
+  <div class="fm-object__root">
+    <!-- 这里用schema.properties来迭代，是为了保证隐藏再显示后属性的顺序仍然一致 -->
     <template v-for="(propSchema,prop) in schema.properties">
       <v-item
         v-if="value.hasOwnProperty(prop)"
         v-model="value[prop]"
-        ref="item"
+        ref="properties"
         :key="prop"
         :schema="propSchema"
         :required="schema.required&&schema.required.includes(prop)||propSchema.type==='array'&&!!propSchema.minItems"
         :root-value="rootValue"
-        @validate="onValidate(prop,$event)"
+        @validate="$emit('validate',prop,$event)"
+        @destroy="$emit('destroy',prop)"
       ></v-item>
     </template>
   </div>
@@ -21,7 +22,9 @@ import VItem from './item'
 
 export default {
   components: {
-    VItem
+    VItem(resolve) {
+      resolve(VItem)
+    }
   },
   props: {
     schema: {
@@ -30,21 +33,18 @@ export default {
     },
     value: {
       required: true,
-      type: Array
+      type: Object
     },
     rootValue: { // 整个表单的值
       required: true
     }
   },
-  data() {
-    return {
-      data
-    }
-  },
   methods: {
-    onValidate(prop, result) {
-      this.$set(this.validateResult.properties, prop, result)
-    },
+    validate() { // 校验整个表单
+      ; (this.$refs.properties || []).forEach(function (item) {
+        item.validate()
+      })
+    }
   }
 }
 </script>

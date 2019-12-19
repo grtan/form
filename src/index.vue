@@ -1,41 +1,48 @@
 <template>
-  <div>
-    <item
-      :class="$style.form"
-      :schema="schema"
-      :validate-on-init="validateOnInit"
-      v-model="value"
-      @validate="onValidate"
-    ></item>
-    <el-button @click="validate">校验</el-button>
+  <div class="fm__root">
+    <v-item ref="form" class="fm__body" :schema="schema" :label-width="labelWidth" v-model="value"></v-item>
+    <div class="fm__footer">
+      <el-button type="primary" @click="onConfirm">确定</el-button>
+      <el-button type="warning" @click="onReset">重置</el-button>
+    </div>
   </div>
 </template>
 
-<style lang="less" module>
-.form {
-  text-align: left;
+<style lang="less">
+.fm {
+  &__body {
+    text-align: left;
+  }
+
+  &__footer {
+    margin-top: 20px;
+    text-align: center;
+
+    .el-button + .el-button {
+      margin-left: 30px;
+    }
+  }
 }
 </style>
 
 <script>
-import Item from './component/item'
+import VItem from './component/item'
 
 export default {
   components: {
-    Item
+    VItem
   },
   props: {
     schema: {
       required: true,
       type: Object
     },
-    validateOnInit: {
-      type: Boolean,
-      default: false
+    submit: {
+      required: true,
+      type: Function
     },
-    action: {
-      // required: true,
-      type: String
+    labelWidth: {
+      type: Number
     }
   },
   data() {
@@ -43,30 +50,14 @@ export default {
       value: undefined
     }
   },
-  watch: {
-    value: {
-      handler(value, oldValue) {
-        console.log('deep watch', value)
-        // console.log(JSON.stringify(value), JSON.stringify(oldValue))
-      },
-      deep: true
-    }
-  },
-  created() {
-    // setTimeout(() => {
-    //   this.$children[0].validate(function (result) {
-    //     console.log('检测结果', result)
-    //   })
-    // }, 2000)
-  },
   methods: {
-    validate() {
-      this.$children[0].validate(function (result) {
-        console.log('检测结果', result)
+    onConfirm() {
+      this.$refs.form.validate((valid, detail) => {
+        valid && this.submit(JSON.parse(JSON.stringify(this.value)))
       })
     },
-    onValidate(validateResult) {
-      console.log('validateResult', validateResult)
+    onReset() {
+      this.value = undefined
     }
   }
 }
