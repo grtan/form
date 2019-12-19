@@ -133,7 +133,7 @@ export default {
 </script>
 ```
 
-[demo/array.vue](https://gitlab.vmic.xyz/game-fed/form/tree/master/demo/array.vue)如下
+[demo/array.vue](../demo/array.vue)如下
 
 ```
 <template>
@@ -214,7 +214,7 @@ export default {
 </script>
 ```
 
-[demo/object.vue](https://gitlab.vmic.xyz/game-fed/form/tree/master/demo/object.vue)如下
+[demo/object.vue](../demo/object.vue)如下
 
 ```
 <template>
@@ -384,7 +384,7 @@ export default {
 </script>
 ```
 
-[demo/base.vue](https://gitlab.vmic.xyz/game-fed/form/tree/master/demo/base.vue)如下
+[demo/base.vue](../demo/base.vue)如下
 
 ```
 <template>
