@@ -332,8 +332,13 @@ export default {
     },
     fixedValue() { // 根据schema并剔除隐藏的项后生成最终的value
       const schema = this.schema
-      const { type, default: defaultValue } = schema
+      let { type, default: defaultValue } = schema
       let data
+
+      // 拷贝默认值
+      if (defaultValue !== undefined) {
+        defaultValue = JSON.parse(JSON.stringify(defaultValue))
+      }
 
       switch (type) {
         case 'object':
@@ -357,6 +362,9 @@ export default {
 
             if (!data.hasOwnProperty(prop)) {
               // 给子属性设置初始值，不能统一设置成undefined，不然基本类型有默认值时初始化时就会触发校验
+              /**
+               * 当value初始为undefined时，el-input-number会触发input事件，导致覆盖掉fixedValue设置的默认值
+               */
               const type = schema.properties[prop].type
               const defaultValue = schema.properties[prop].default
               let value
@@ -629,10 +637,17 @@ export default {
       if (typeof validator === 'function') {
         rules.value.push({
           validator(rule, value, callback) {
-            validator(value, callback)
+            validator(JSON.parse(JSON.stringify(value)), callback)
           }
         })
       }
+
+      // 这里加个空的校验函数是为了执行this.$refs.form.validate()时一定会给出校验结果
+      rules.value.push({
+        validator(rule, value, callback) {
+          callback()
+        }
+      })
 
       return rules
     }
@@ -658,19 +673,21 @@ export default {
     },
     fixedValidateResult: {
       immediate: true,
-      handler(value) {
+      handler(value, oldValue) {
+        if (value === oldValue) {
+          return
+        }
+
         this.validateResult = value
       }
     },
-    validateResult(value) {
-      // 非根组件
-      !this.isRoot && this.$emit('validate', value)
+    validateResult: {
+      immediate: true,
+      handler(value) {
+        // 非根组件
+        !this.isRoot && this.$emit('validate', value)
+      }
     }
-  },
-  created() {
-    this.$nextTick(function () {
-      this.canValidate = true
-    })
   },
   methods: {
     isHidden(schema) { // 根据schema判断是否需要隐藏
@@ -727,6 +744,11 @@ export default {
         callback(...travel(this.validateResult).reverse())
       })
     }
+  },
+  created() {
+    this.$nextTick(function () {
+      this.canValidate = true
+    })
   },
   beforeDestroy() {
     this.$emit('destroy')

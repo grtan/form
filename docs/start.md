@@ -1,4 +1,97 @@
+# 快速开始
+
 ## 使用方法
+
+```
+<template>
+  <vc-form :schema="schema" :submit="submit"></vc-form>
+</template>
+
+<script>
+import VCForm from 'vcform'
+
+export default {
+  components: {
+    VCForm
+  },
+  data() {
+    return {
+      schema: {
+        title: '根对象',
+        type: 'object',
+        required: ['key1', 'key2'],
+        properties: {
+          key1: {
+            title: '文本',
+            type: 'string',
+            component: 'textarea'
+          },
+          key2: {
+            title: '数字',
+            type: 'number',
+            minimum: 1,
+            maximum: 10,
+            multipleOf: 0.5
+          },
+          key5: {
+            title: '时间',
+            type: 'range',
+            format: 'datetime',
+            valueFormat: 'HH:mm'
+          },
+          key6: {
+            title: '地址',
+            type: 'address',
+            format: 'city'
+          },
+          key4: {
+            title: '数组',
+            type: 'array',
+            minItems: 1,
+            maxItems: 3,
+            items: {
+              title: '对象',
+              type: 'object',
+              required: ['key4', 'key5'],
+              properties: {
+                key3: {
+                  title: '数字',
+                  type: 'number',
+                  minimum: 3,
+                  maximum: 7,
+                  default: 4
+                },
+                key4: {
+                  title: '布尔值',
+                  type: 'boolean',
+                  default: true,
+                  readonly: true,
+                  component: 'switch',
+                  hidden: 'data.key4[0].key3===3'
+                },
+                key5: {
+                  title: '颜色',
+                  type: 'string',
+                  format: 'color',
+                  enum: ['#000', '#aaa', '#f00'],
+                  enumNames: ['黑色', '白色', '红色'],
+                  component: 'select'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  methods: {
+    submit (value) {
+      ...
+    }
+  }
+};
+</script>
+```
 
 ## 属性
 

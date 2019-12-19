@@ -58,7 +58,29 @@ export default {
   },
   methods: {
     onAdd() {
-      this.value.push(undefined)
+      let { type, default: defaultValue } = this.schema.items
+      let value
+
+      // 拷贝默认值
+      if (defaultValue !== undefined) {
+        defaultValue = JSON.parse(JSON.stringify(defaultValue))
+      }
+
+      switch (type) {
+        case 'object':
+          value = defaultValue || {}
+          break
+        case 'array':
+        case 'address':
+        case 'range':
+          value = defaultValue instanceof Array ? defaultValue : (type === 'range' ? ['', ''] : [])
+          break
+        default:
+          // eslint-disable-next-line valid-typeof
+          value = typeof defaultValue === type ? defaultValue : undefined
+      }
+
+      this.value.push(value)
     },
     onDelete(index) {
       this.value.splice(index, 1)
