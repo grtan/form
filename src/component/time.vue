@@ -89,7 +89,7 @@ export default {
         return value
       },
       set(time) {
-        let value = this.schema.type === 'range' ? [...(time || ['', ''])] : (time || '')
+        let value = this.schema.type === 'range' ? [...(time || [])] : (time || '')
 
         if (this.schema.format === 'week') {
           if (value instanceof Array) {
