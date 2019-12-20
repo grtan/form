@@ -2,7 +2,7 @@
   <div :class="['fm-image__root',{'fm-image--uploaded':schema.readonly||value}]">
     <el-upload
       ref="upload"
-      :action="schema.action"
+      :action="schema.action||''"
       :name="schema.name"
       :headers="schema.headers"
       :with-credentials="schema.withCredentials"
@@ -130,8 +130,18 @@ export default {
       return this.schema.fileValidator(file, this.onValidateFail)
     },
     onSuccess(res, file) {
+      let url
+
+      if (typeof this.schema.urlFetcher === 'string') {
+        const response = file.response
+
+        url = eval(this.schema.urlFetcher)
+      } else {
+        url = this.schema.urlFetcher(file.response)
+      }
+
       this.$refs.upload.clearFiles()
-      this.$emit('input', this.schema.urlFetcher(file.response))
+      this.$emit('input', url)
     },
     onPreview() {
       this.preview = true

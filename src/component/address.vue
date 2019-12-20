@@ -8,7 +8,7 @@
       :disabled="schema.readonly"
     ></el-cascader>
     <el-input
-      v-if="schema.format==='detail'"
+      v-if="format==='detail'"
       type="textarea"
       :rows="2"
       :maxlength="schema.maxLength"
@@ -64,6 +64,9 @@ export default {
     }
   },
   computed: {
+    format() {
+      return this.schema.format || 'detail'
+    },
     filter() { // 是否过滤特殊地区
       return this.schema.filter !== undefined ? !!this.schema.filter : true
     },
@@ -76,12 +79,12 @@ export default {
           city: 2,
           area: 3,
           detail: 3
-        }[this.schema.format])
+        }[this.format])
       },
       set(address) {
         const value = [...address]
 
-        this.schema.format === 'detail' && value.push(this.detail)
+        this.format === 'detail' && value.push(this.detail)
         this.$emit('input', value)
       }
     },
@@ -101,16 +104,16 @@ export default {
     async getAddress() {
       const address = await axiosInstance.get(`//shequwsdl.vivo.com.cn/shequ/address_${this.filter ? 'filter' : 'full'}.json`)
 
-      this.addressList = this.format(address)
+      this.addressList = this.formatAddress(address)
     },
-    format(address, level = 0) { // 格式化地址数据
+    formatAddress(address, level = 0) { // 格式化地址数据
       const data = []
       const target = {
         province: 0,
         city: 1,
         area: 2,
         detail: 2
-      }[this.schema.format]
+      }[this.format]
 
       if (address instanceof Array) {
         address.forEach(function (value) {
@@ -127,7 +130,7 @@ export default {
           }
 
           if (level < target) {
-            item.children = this.format(address[value], level + 1)
+            item.children = this.formatAddress(address[value], level + 1)
           }
 
           data.push(item)

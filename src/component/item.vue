@@ -376,7 +376,7 @@ export default {
                 case 'array':
                 case 'address':
                 case 'range':
-                  value = defaultValue instanceof Array ? defaultValue : (type === 'range' ? ['', ''] : [])
+                  value = defaultValue instanceof Array ? defaultValue : []
                   break
                 default:
                   // eslint-disable-next-line valid-typeof
@@ -390,7 +390,7 @@ export default {
         case 'array':
         case 'address':
         case 'range':
-          data = this.value instanceof Array ? this.value : (defaultValue instanceof Array ? defaultValue : (type === 'range' ? ['', ''] : []))
+          data = this.value instanceof Array ? this.value : (defaultValue instanceof Array ? defaultValue : [])
           this.hidden && data.splice(0) // 当前组件需要隐藏，删除所有元素
           break
         default:
@@ -452,7 +452,13 @@ export default {
       }
 
       this.required && rules.value.push({
-        type,
+        type: function () {
+          if (['address', 'range'].includes(type)) {
+            return 'array'
+          }
+
+          return type
+        }(),
         required: true,
         message: '输入不能为空'
       })
@@ -542,7 +548,7 @@ export default {
             }
           })
 
-          if (format === 'detail') {
+          if ((format || 'detail') === 'detail') {
             if (typeof minLength === 'number') {
               rules.value.push({
                 validator(rule, value, callback) {
@@ -660,16 +666,16 @@ export default {
         value !== oldValue && this.$emit('input', value)
       }
     },
-    value() {
+    model() {
       // 确保this.value初始化后再进行校验
       if (!this.canValidate) {
         return
       }
 
-      /**
-       * 这里为什么不在watch fixedValue里调用，是因为computed属性只要返回对象，不管值有没有变化都一定会触发watch
-       */
-      this.$refs.form && this.$refs.form.validate(noop)
+      // 必须等重新render后再校验，否则form的model数据还是原来的旧值
+      this.$refs.form && this.$nextTick(function () {
+        this.$refs.form.validate(noop)
+      })
     },
     fixedValidateResult: {
       immediate: true,

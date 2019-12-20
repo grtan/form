@@ -1,6 +1,6 @@
 {
   "name": "vcform",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "可配置的通用表单组件",
   "main": "src/index.vue",
   "scripts": {

@@ -73,7 +73,7 @@ export default {
         case 'array':
         case 'address':
         case 'range':
-          value = defaultValue instanceof Array ? defaultValue : (type === 'range' ? ['', ''] : [])
+          value = defaultValue instanceof Array ? defaultValue : []
           break
         default:
           // eslint-disable-next-line valid-typeof
