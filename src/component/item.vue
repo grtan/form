@@ -2,7 +2,7 @@
   <el-form
     v-if="!hidden"
     ref="form"
-    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase}]"
+    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase,'fm-item--invalid':error}]"
     :label-width="`${isBase?labelWidth:0}px`"
     :model="model"
     :rules="rules"
@@ -37,7 +37,6 @@
               :is="typeof schema.component==='function'?schema.component():'v-object'"
               :schema="schema"
               :value="value"
-              :root-value="rootData"
               @validate="$set(validateResult.properties, ...arguments)"
               @destroy="$delete(validateResult.properties,$event)"
             ></component>
@@ -73,7 +72,6 @@
               :is="typeof schema.component==='function'?schema.component():'v-array'"
               :schema="schema"
               :value="value"
-              :root-value="rootData"
               @validate="$set(validateResult.items, ...arguments)"
               @destroy="validateResult.items.splice($event, 1)"
             ></component>
@@ -82,7 +80,7 @@
       </template>
 
       <!-- 基本类型、地址、时间范围 -->
-      <div v-else class="fm-item__content">
+      <div v-else :class="['fm-item__content',{'fm-item__content--valid':!error}]">
         <component
           :is="typeof schema.component==='function'?schema.component():'v-base'"
           :schema="schema"
@@ -96,14 +94,27 @@
 </template>
 
 <style lang="less">
+@normal: #dcdfe6;
+@hover: #c0c4cc;
+@focus: #409eff;
+@invalid: #f56c6c;
+
 .fm-item {
   &__root {
     &.fm-item--combined {
       &:not(.fm-item--root) {
         margin: 5px 5px 5px 0;
-        border: 1px solid #ccc;
+        border: 1px solid @normal;
         border-radius: 5px;
         overflow: hidden;
+
+        &:hover {
+          border-color: @hover;
+        }
+
+        &.fm-item--invalid {
+          border-color: @invalid;
+        }
 
         & + .fm-item__root {
           margin-top: 25px;
@@ -209,6 +220,21 @@
   &__content {
     float: left;
     width: 70%;
+
+    &--valid {
+      .el-input__inner,
+      .el-textarea__inner {
+        border-color: @normal !important;
+
+        &:hover {
+          border-color: @hover !important;
+        }
+
+        &:focus {
+          border-color: @focus !important;
+        }
+      }
+    }
   }
 }
 </style>
@@ -290,6 +316,14 @@ export default {
     VArray,
     VBase
   },
+  provide() {
+    return this.provideData
+  },
+  inject: {
+    fmGlobal: {
+      default: undefined
+    }
+  },
   props: {
     schema: {
       type: Object,
@@ -297,9 +331,6 @@ export default {
     },
     value: {
       required: true
-    },
-    rootValue: { // 整个表单的值
-      default: undefined
     },
     required: { // 是否必填
       type: Boolean,
@@ -318,14 +349,25 @@ export default {
   },
   computed: {
     isRoot() { // 是不是根组件
-      return !this.rootValue
+      return !this.fmGlobal
+    },
+    provideData() { // 共享给后代组件的数据
+      const self = this
+
+      return this.isRoot ? {
+        fmGlobal: {
+          get value() { // 整个表单的值
+            return self.value
+          },
+          inited: false // 整个表单是否已初始化
+        }
+      } : {}
     },
     isBase() { // 是不是基本数据类型
       return !['object', 'array'].includes(this.schema.type)
     },
-    rootData() { // 根组件数据（即整个表单的数据）
-      // 根组件最初是没有rootValue的
-      return this.rootValue || this.value
+    global() { // 全局数据
+      return this.fmGlobal || this.provideData.fmGlobal
     },
     hidden() { // 当前组件是否需要隐藏
       return this.isHidden(this.schema)
@@ -666,16 +708,21 @@ export default {
         value !== oldValue && this.$emit('input', value)
       }
     },
-    model() {
-      // 确保this.value初始化后再进行校验
-      if (!this.canValidate) {
-        return
-      }
+    model: {
+      immediate: true,
+      handler() {
+        // 确保表单初始化后再进行校验，且同一个tick内只校验一次
+        if (!this.global.inited || this.formValidated) {
+          return
+        }
 
-      // 必须等重新render后再校验，否则form的model数据还是原来的旧值
-      this.$refs.form && this.$nextTick(function () {
-        this.$refs.form.validate(noop)
-      })
+        this.formValidated = true
+        // 必须等重新render后再校验，否则form的model数据还是原来的旧值
+        this.$nextTick(function () {
+          this.formValidated = false
+          this.$refs.form.validate(noop)
+        })
+      },
     },
     fixedValidateResult: {
       immediate: true,
@@ -689,9 +736,12 @@ export default {
     },
     validateResult: {
       immediate: true,
-      handler(value) {
-        // 非根组件
-        !this.isRoot && this.$emit('validate', value)
+      handler(value, oldValue) {
+        if (this.isRoot || value === oldValue) {
+          return
+        }
+
+        this.$emit('validate', value)
       }
     }
   },
@@ -704,12 +754,12 @@ export default {
         if (typeof expression === 'string') {
           // 必须要将this.rootData的影响范围降到最小，否则rootData被修改后所有字段的fixedValue都要重新计算
           // eslint-disable-next-line no-unused-vars
-          const data = JSON.parse(JSON.stringify(this.rootData))
+          const data = JSON.parse(JSON.stringify(this.global.value))
 
           // eslint-disable-next-line no-eval
           hidden = !!eval(expression)
         } else if (typeof expression === 'function') {
-          hidden = !!expression(JSON.parse(JSON.stringify(this.rootData)))
+          hidden = !!expression(JSON.parse(JSON.stringify(this.global.value)))
         } else {
           hidden = !!expression
         }
@@ -752,8 +802,9 @@ export default {
     }
   },
   created() {
-    this.$nextTick(function () {
-      this.canValidate = true
+    this.isRoot && this.$nextTick(function () {
+      // 整个表单初始化完成
+      this.global.inited = true
     })
   },
   beforeDestroy() {

@@ -78,6 +78,13 @@
           @input="$listeners.input"
         ></v-enum>
         <!-- 从接口获取枚举结果，展示列表组件来选择 -->
+        <!-- 富文本 -->
+        <v-richtext
+          v-else-if="schema.component==='richtext'"
+          :schema="schema"
+          :value="value"
+          @input="$listeners.input"
+        ></v-richtext>
         <!-- 普通输入 -->
         <el-input
           v-else
@@ -159,6 +166,7 @@ import VImage from './image'
 import VFile from './file'
 import VAddress from './address'
 import VTime from './time'
+import VRichtext from './richtext/index'
 
 export default {
   components: {
@@ -166,7 +174,8 @@ export default {
     VImage,
     VFile,
     VAddress,
-    VTime
+    VTime,
+    VRichtext
   },
   props: {
     schema: {

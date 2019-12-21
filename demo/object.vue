@@ -31,6 +31,7 @@ export default {
   components: {
     VBase
   },
+  inject: ['fmGlobal'], // 整个表单共享的数据（只读）
   props: {
     schema: {
       required: true,
@@ -38,15 +39,12 @@ export default {
     },
     value: {
       type: Object,
-      default () {
+      default() {
         return {}
       }
-    },
-    rootValue: { // 整个表单的值
-      required: true
     }
   },
-  data () {
+  data() {
     return {
       validateResult: { // 校验结果
         properties: {}
@@ -54,7 +52,7 @@ export default {
     }
   },
   computed: {
-    fixedValue () { // 根据schema并剔除隐藏的项后生成最终的value
+    fixedValue() { // 根据schema并剔除隐藏的项后生成最终的value
       const schema = this.schema
       const { default: defaultValue } = schema
       let data = this.value || defaultValue || {}
@@ -78,26 +76,26 @@ export default {
   watch: {
     fixedValue: {
       immediate: true,
-      handler (value, oldValue) {
+      handler(value, oldValue) {
         value !== oldValue && this.$emit('input', value)
       }
     }
   },
   methods: {
-    isHidden (schema) { // 根据schema判断是否需要隐藏
+    isHidden(schema) { // 根据schema判断是否需要隐藏
       const expression = schema.hidden
       let hidden
 
       try {
         if (typeof expression === 'string') {
-          // 必须要将this.rootData的影响范围降到最小，否则rootData被修改后所有字段的fixedValue都要重新计算
+          // this.fmGlobal.value表示整个表单的当前值，必须将影响范围降到最小
           // eslint-disable-next-line no-unused-vars
-          const data = JSON.parse(JSON.stringify(this.rootValue))
+          const data = JSON.parse(JSON.stringify(this.fmGlobal.value))
 
           // eslint-disable-next-line no-eval
           hidden = !!eval(expression)
         } else if (typeof expression === 'function') {
-          hidden = !!expression(JSON.parse(JSON.stringify(this.rootValue)))
+          hidden = !!expression(JSON.parse(JSON.stringify(this.fmGlobal.value)))
         } else {
           hidden = !!expression
         }
@@ -124,15 +122,15 @@ export default {
 
       return hidden
     },
-    onValidate (prop, result) {
+    onValidate(prop, result) {
       // 添加prop属性的校验结果
       this.$set(this.validateResult.properties, prop, result)
     },
-    onDestroy (prop) {
+    onDestroy(prop) {
       // 删除prop属性的校验结果
       this.$delete(this.validateResult.properties, prop)
     },
-    validate () { // 必须
+    validate() { // 必须
       // 对自身value进行校验
       if (typeof this.schema.validator === 'function') {
         this.schema.validator(JSON.parse(JSON.stringify(this.value)), (error) => {
@@ -147,11 +145,11 @@ export default {
       })
     }
   },
-  created () {
+  created() {
     // 将校验结果传递给父组件
     this.$emit('validate', this.validateResult)
   },
-  beforeDestroy () {
+  beforeDestroy() {
     // 通知父组件，以便父组件删除本元素的校验结果
     this.$emit('destroy')
   }

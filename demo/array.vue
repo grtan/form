@@ -6,7 +6,6 @@
           ref="items"
           :schema="schema.items"
           :value="value[index]"
-          :root-value="rootValue"
           @input="$event!==value[index]&&$set(value,index,$event)"
           @validate="onValidate(index,$event)"
           @destroy="onDestroy(index)"
@@ -45,27 +44,24 @@ export default {
     value: { // 当前字段的值
       required: true,
       type: Array
-    },
-    rootValue: { // 整个表单的值
-      required: true
     }
   },
   methods: {
-    onAdd () {
+    onAdd() {
       this.value.push(undefined)
     },
-    onDelete (index) {
+    onDelete(index) {
       this.value.splice(index, 1)
     },
-    onValidate (index, result) {
+    onValidate(index, result) {
       // 子元素触发校验事件时需要继续传递给父组件，以便父组件在校验结果中添加该元素的结果
       this.$emit('validate', index, result)
     },
-    onDestroy (index) {
+    onDestroy(index) {
       // 子元素销毁时需要继续传递给父组件，以便父组件在校验结果中丢弃该元素的结果
       this.$emit('destroy', index)
     },
-    validate () { // 校验方法，必须提供，供父组件调用来进行校验
+    validate() { // 校验方法，必须提供，供父组件调用来进行校验
       // 父组件会对数组本身进行校验，这里只需要对各个元素进行校验
       ; (this.$refs.items || []).forEach(function (item) {
         item.validate()

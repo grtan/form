@@ -9,7 +9,6 @@
         :key="prop"
         :schema="propSchema"
         :required="schema.required&&schema.required.includes(prop)||propSchema.type==='array'&&!!propSchema.minItems"
-        :root-value="rootValue"
         @validate="$emit('validate',prop,$event)"
         @destroy="$emit('destroy',prop)"
       ></v-item>
@@ -34,9 +33,6 @@ export default {
     value: {
       required: true,
       type: Object
-    },
-    rootValue: { // 整个表单的值
-      required: true
     }
   },
   methods: {

@@ -12,7 +12,6 @@
           ref="items"
           :schema="schema.items"
           :value="value[index]"
-          :root-value="rootValue"
           @input="$event!==value[index]&&$set(value,index,$event)"
           @validate="$emit('validate',index,$event)"
           @destroy="$emit('destroy',index)"
@@ -51,9 +50,6 @@ export default {
     value: {
       required: true,
       type: Array
-    },
-    rootValue: { // 整个表单的值
-      required: true
     }
   },
   methods: {
