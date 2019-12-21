@@ -7,4 +7,4 @@
 * [schema配置](./docs/schema.md)
 * [自定义组件](./docs/component.md)
 
-![demo](./docs/demo.jpg)
+![demo](./docs/demo.png)
