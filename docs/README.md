@@ -13,4 +13,4 @@ npm i vue element-ui vcform
 
 ## 注意
 
-> 该组件必须在`webpack`项目中使用。打包后的根目录中会生成`langs`、`plugins`、`skins`三个目录，必须将这三个目录部署到站点根目录
+> 该组件必须在`webpack`项目中使用

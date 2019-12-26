@@ -25,6 +25,7 @@ export default {
     return {
       config: {
         height: 300,
+        base_url: 'tinymce',
         language: 'zh_CN',
         plugins: [
           'advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker',

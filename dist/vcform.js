@@ -3756,53 +3756,44 @@ var generate_resource = __webpack_require__(50);
     return {
       config: {
         height: 300,
-        skin: window.matchMedia("(prefers-color-scheme: dark)").matches ? "oxide-dark" : "",
-        content_css: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "",
-        // skin_url: '/tinymce'
+        base_url: 'tinymce',
         language: 'zh_CN',
         plugins: ['advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker', 'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking', 'save table contextmenu directionality emoticons template paste textcolor'],
         paste_data_images: true,
-        images_upload_handler: this.schema.uploader,
-        file_picker_types: 'file image media',
-        file_picker_callback: function file_picker_callback(callback, value, meta) {
-          var input = document.createElement('input');
-          input.setAttribute('type', 'file');
-          input.setAttribute('accept', '*/*');
-          /*
-            Note: In modern browsers input[type="file"] is functional without
-            even adding it to the DOM, but that might not be the case in some older
-            or quirky browsers like IE, so you might want to add it to the DOM
-            just in case, and visually hide it. And do not forget do remove it
-            once you do not need it anymore.
-          */
+        images_upload_handler: this.schema.uploader // file_picker_types: 'file image media',
+        // file_picker_callback: function (callback, value, meta) {
+        //   var input = document.createElement('input');
+        //   input.setAttribute('type', 'file');
+        //   input.setAttribute('accept', '*/*');
+        //   /*
+        //     Note: In modern browsers input[type="file"] is functional without
+        //     even adding it to the DOM, but that might not be the case in some older
+        //     or quirky browsers like IE, so you might want to add it to the DOM
+        //     just in case, and visually hide it. And do not forget do remove it
+        //     once you do not need it anymore.
+        //   */
+        //   input.onchange = function () {
+        //     var file = this.files[0];
+        //     var reader = new FileReader();
+        //     reader.onload = function () {
+        //       /*
+        //         Note: Now we need to register the blob in TinyMCEs image blob
+        //         registry. In the next release this part hopefully won't be
+        //         necessary, as we are looking to handle it internally.
+        //       */
+        //       var id = 'blobid' + (new Date()).getTime();
+        //       var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+        //       var base64 = reader.result.split(',')[1];
+        //       var blobInfo = blobCache.create(id, file, base64);
+        //       blobCache.add(blobInfo);
+        //       /* call the callback and populate the Title field with the file name */
+        //       callback(blobInfo.blobUri(), { title: file.name });
+        //     };
+        //     reader.readAsDataURL(file);
+        //   };
+        //   input.click();
+        // }
 
-          input.onchange = function () {
-            var file = this.files[0];
-            var reader = new FileReader();
-
-            reader.onload = function () {
-              /*
-                Note: Now we need to register the blob in TinyMCEs image blob
-                registry. In the next release this part hopefully won't be
-                necessary, as we are looking to handle it internally.
-              */
-              var id = 'blobid' + new Date().getTime();
-              var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-              var base64 = reader.result.split(',')[1];
-              var blobInfo = blobCache.create(id, file, base64);
-              blobCache.add(blobInfo);
-              /* call the callback and populate the Title field with the file name */
-
-              callback(blobInfo.blobUri(), {
-                title: file.name
-              });
-            };
-
-            reader.readAsDataURL(file);
-          };
-
-          input.click();
-        }
       }
     };
   }
@@ -4556,13 +4547,13 @@ module.exports = require("tinymce/themes/silver");
 /***/ (function(module, exports) {
 
 // 生成插件
-require.context('!!file-loader?name=[path][name].[ext]&context=node_modules/tinymce!tinymce/plugins', true, /.*/); // 生成皮肤
+require.context('!!file-loader?name=tinymce/[path][name].[ext]&context=node_modules/tinymce!tinymce/plugins', true, /.*/); // 生成皮肤
 
 
-require.context('!!file-loader?name=[path][name].[ext]&context=node_modules/tinymce!tinymce/skins', true, /.*/); // 生成语言
+require.context('!!file-loader?name=tinymce/[path][name].[ext]&context=node_modules/tinymce!tinymce/skins', true, /.*/); // 生成语言
 
 
-require.context('!!file-loader?name=[path][name].[ext]&context=node_modules/vcform/src/component/richtext!vcform/src/component/richtext/langs', true, /.*/);
+require.context('!!file-loader?name=tinymce/[path][name].[ext]&context=node_modules/vcform/src/component/richtext!vcform/src/component/richtext/langs', true, /.*/);
 
 /***/ }),
 /* 51 */
