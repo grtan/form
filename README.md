@@ -6,5 +6,6 @@
 * [快速开始](./docs/start.md)
 * [schema配置](./docs/schema.md)
 * [自定义组件](./docs/component.md)
+* [playground](http://vui.vivo.xyz:9002)
 
 ![demo](./docs/demo.png)
