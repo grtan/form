@@ -47,10 +47,11 @@
 </style>
 
 <script>
-import * as monaco from 'monaco-editor'
+import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api'
 import { debounce } from 'lodash-es'
 import VcForm from 'vcform'
 
+const monaco = { editor, MarkerSeverity }
 const schemaCode = (function () {
   const schema = {
     title: '根对象',
@@ -202,7 +203,6 @@ export default {
   },
   mounted () {
     this.schemaEditor = monaco.editor.create(this.$refs.schema, {
-      // value: value.replace(/[^\\]"(function(?= |\()[^"]+)"/g, ' $1').replace(/\\n/g, '\n'),
       value: this.schemaCode,
       language: 'javascript',
       theme: 'vs-dark',
@@ -231,11 +231,6 @@ export default {
       this.syntaxError = ''
       this.schemaCode = this.schemaEditor.getValue()
     }, 1000))
-
-    // setTimeout(() => {
-    //   this.schemaEditor.trigger('', 'editor.action.formatDocument')
-    // this.schemaEditor.getAction('editor.action.format').run()
-    // }, 1000)
   }
 }
 </script>
