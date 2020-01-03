@@ -2,6 +2,19 @@
 
 ## 使用方法
 
+`main.js`
+
+```
+import Vue from 'vue'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
+// 完整引入element-ui
+Vue.use(ElementUI)
+```
+
+`page.vue`
+
 ```
 <template>
   <vc-form :schema="schema" :submit="submit"></vc-form>

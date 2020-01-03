@@ -133,7 +133,7 @@ export default {
 </script>
 ```
 
-[demo/array.vue](../demo/array.vue)如下
+[custom-component-demo/array.vue](../custom-component-demo/array.vue)如下
 
 ```
 <template>
@@ -210,7 +210,7 @@ export default {
 </script>
 ```
 
-[demo/object.vue](../demo/object.vue)如下
+[custom-component-demo/object.vue](../custom-component-demo/object.vue)如下
 
 ```
 <template>
@@ -372,7 +372,7 @@ export default {
 </script>
 ```
 
-[demo/base.vue](../demo/base.vue)如下
+[custom-component-demo/base.vue](../custom-component-demo/base.vue)如下
 
 ```
 <template>

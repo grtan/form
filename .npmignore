@@ -1,6 +1,11 @@
+/build
+/custom-component-demo
+/demo
+/docs
+/*.js
 node_modules
-/package-lock.json
-dist
+.gitignore
+.npmignore
 
 # Log files
 npm-debug.log*

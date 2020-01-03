@@ -4,6 +4,7 @@
     ref="form"
     :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase,'fm-item--invalid':error}]"
     :label-width="`${isBase?labelWidth:0}px`"
+    size="mini"
     :model="model"
     :rules="rules"
     :status-icon="true"
