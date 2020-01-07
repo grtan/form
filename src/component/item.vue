@@ -2,8 +2,8 @@
   <el-form
     v-if="!hidden"
     ref="form"
-    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase,'fm-item--invalid':error}]"
-    :label-width="`${isBase?labelWidth:0}px`"
+    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase,'fm-item--invalid':error},schema.className]"
+    :label-width="`${isBase?global.labelWidth:0}px`"
     size="mini"
     :model="model"
     :rules="rules"
@@ -22,7 +22,7 @@
                 <el-col :span="15">
                   <span
                     class="fm-item__label"
-                    :style="{width:`${labelWidth}px`}"
+                    :style="{width:`${global.labelWidth}px`}"
                     :data-required="required?'*':''"
                   >{{schema.title}}</span>
                   <span
@@ -54,7 +54,7 @@
                 <el-col :span="12">
                   <span
                     class="fm-item__label"
-                    :style="{width:`${labelWidth}px`}"
+                    :style="{width:`${global.labelWidth}px`}"
                     :data-required="required?'*':''"
                   >{{schema.title}}</span>
                   <span
@@ -200,11 +200,13 @@
   }
 
   &__description {
+    color: #bbb;
     font-size: 0.8em;
-    font-weight: bold;
 
     &--content {
-      margin-top: 0.6em;
+      margin: .8em 0;
+      color: #bbb;
+      font-size: 0.8em;
       line-height: 1;
     }
   }
@@ -311,7 +313,6 @@ function travel(item = {}, valid = true) {
 }
 
 export default {
-  name: 'v-item',
   components: {
     VObject,
     VArray,
@@ -360,6 +361,9 @@ export default {
           get value() { // 整个表单的值
             return self.value
           },
+          get labelWidth() { // label宽度
+            return self.labelWidth
+          },
           inited: false // 整个表单是否已初始化
         }
       } : {}
@@ -379,7 +383,7 @@ export default {
       let data
 
       // 拷贝默认值
-      if (defaultValue !== undefined) {
+      if (typeof defaultValue === 'object') {
         defaultValue = JSON.parse(JSON.stringify(defaultValue))
       }
 
@@ -528,7 +532,7 @@ export default {
           if (['image', 'video', 'file'].includes(format)) {
             rules.value.push({
               validator(rule, value, callback) {
-                if (value.startsWith('validate:')) {
+                if (value && value.startsWith('validate:')) {
                   callback(new Error(value.replace(/^validate\:/, '')))
                 } else {
                   callback()
@@ -754,11 +758,10 @@ export default {
       try {
         if (typeof expression === 'string') {
           // 必须要将this.rootData的影响范围降到最小，否则rootData被修改后所有字段的fixedValue都要重新计算
-          // eslint-disable-next-line no-unused-vars
           const data = JSON.parse(JSON.stringify(this.global.value))
+          const fn = new Function('data', `return !!(${expression})`)
 
-          // eslint-disable-next-line no-eval
-          hidden = !!eval(expression)
+          hidden = fn(data)
         } else if (typeof expression === 'function') {
           hidden = !!expression(JSON.parse(JSON.stringify(this.global.value)))
         } else {
@@ -798,7 +801,7 @@ export default {
       this.$refs.array && this.$refs.array.validate()
       // 根组件
       this.isRoot && this.$nextTick(function () {
-        callback(...travel(this.validateResult).reverse())
+        typeof callback === 'function' && callback(...travel(this.validateResult).reverse())
       })
     }
   },

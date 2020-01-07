@@ -3,7 +3,7 @@
     <v-item ref="form" class="fm__body" :schema="schema" :label-width="labelWidth" v-model="value"></v-item>
     <div class="fm__footer">
       <el-button type="primary" @click="onConfirm">确定</el-button>
-      <el-button type="warning" @click="onReset">重置</el-button>
+      <el-button type="warning" @click="setValue(defaultValue)">重置</el-button>
     </div>
   </div>
 </template>
@@ -43,6 +43,9 @@ export default {
     },
     labelWidth: {
       type: Number
+    },
+    defaultValue: {
+      default: undefined
     }
   },
   data() {
@@ -50,14 +53,28 @@ export default {
       value: undefined
     }
   },
+  watch: {
+    defaultValue: {
+      deep: true,
+      immediate: true,
+      handler(value) {
+        this.setValue(value, !!this.inited)
+        this.inited = true
+      }
+    }
+  },
   methods: {
+    setValue(value, validate = true) {
+      this.value = value === undefined ? undefined : JSON.parse(JSON.stringify(value))
+      // 重置时有些字段还是初始值没有进行编辑，无法触发自动校验，只能手动进行校验
+      validate && this.$nextTick(function () {
+        this.$refs.form.validate()
+      })
+    },
     onConfirm() {
       this.$refs.form.validate((valid, detail) => {
         valid && this.submit(JSON.parse(JSON.stringify(this.value)))
       })
-    },
-    onReset() {
-      this.value = undefined
     }
   }
 }

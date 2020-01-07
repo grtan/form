@@ -6,22 +6,19 @@
     :value="fixedValue"
     :disabled="schema.readonly"
     placeholder="请选择"
-    @input="$listeners.input(isBase?$event:schema.enum[$event])"
+    @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
   >
     <el-option
-      v-for="(value,index) in schema.enum"
+      v-for="({value,name,showTip},index) in schema.enum"
       :key="index"
       :label="getSelectLabel(index)"
       :value="isBase?value:index"
       :style="schema.type==='string'&&schema.format==='color'?{background:value}:{}"
     >
-      <!-- 非color -->
-      <template v-if="!(schema.type==='string'&&schema.format==='color')">
-        <div v-if="schema.enumNames&&schema.enumNames[index]" class="fm-select__select-item">
-          <span class="fm-select__select-item--left">{{schema.enumNames[index]}}</span>
-          <span class="fm-select__select-item--right">{{getShowValue(value)}}</span>
-        </div>
-      </template>
+      <div v-if="name&&showTip" class="fm-enum__select-item">
+        <span class="fm-enum__select-item--left">{{name}}</span>
+        <span class="fm-enum__select-item--right">{{getShowValue(value)}}</span>
+      </div>
     </el-option>
   </el-select>
   <!-- radio -->
@@ -30,46 +27,54 @@
     class="fm-enum__root"
     :value="fixedValue"
     :disabled="schema.readonly"
-    @input="$listeners.input(isBase?$event:schema.enum[$event])"
+    @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
   >
-    <el-radio v-for="(value,index) in schema.enum" :key="index" :label="isBase?value:index">
+    <el-radio
+      v-for="({value,name,showTip,download},index) in schema.enum"
+      :key="index"
+      :label="isBase?value:index"
+    >
       <!-- color -->
-      <template v-if="schema.type==='string'&&schema.format==='color'">
-        <span
-          v-if="schema.enumNames&&schema.enumNames[index]"
-          :style="{color:value}"
-        >{{schema.enumNames[index]}}</span>
-        <span v-else class="fm-select__color" :style="{background:value}"></span>
-      </template>
+      <el-tooltip
+        v-if="schema.type==='string'&&schema.format==='color'"
+        :content="value"
+        :disabled="!showTip"
+        placement="bottom"
+      >
+        <span v-if="name" :style="{color:value}">{{name}}</span>
+        <span v-else class="fm-enum__color" :style="{background:value}"></span>
+      </el-tooltip>
 
       <!-- image、video -->
       <el-tooltip
         v-else-if="schema.type==='string'&&['image','video'].includes(schema.format)"
-        :content="schema.enumNames&&schema.enumNames[index]"
-        :disabled="!schema.enumNames||!schema.enumNames[index]"
+        :content="name||value"
+        :disabled="!showTip"
         placement="bottom"
       >
         <v-image :schema="Object.assign({},schema,{readonly:true})" :value="value"></v-image>
       </el-tooltip>
 
       <!-- file -->
-      <el-link
+      <el-tooltip
         v-else-if="schema.type==='string'&&['file'].includes(schema.format)"
-        :href="value"
-        target="_blank"
-      >{{schema.enumNames&&schema.enumNames[index]||value}}</el-link>
+        :content="value"
+        :disabled="!name||!showTip"
+        placement="bottom"
+      >
+        <el-link v-if="download" :href="value" target="_blank">{{name||value}}</el-link>
+        <span v-else>{{name||value}}</span>
+      </el-tooltip>
 
       <!-- 其他 -->
-      <template v-else>
-        <el-tooltip
-          v-if="schema.enumNames&&schema.enumNames[index]"
-          :content="getShowValue(value)"
-          placement="bottom"
-        >
-          <span>{{schema.enumNames[index]}}</span>
-        </el-tooltip>
-        <template v-else>{{getShowValue(value)}}</template>
-      </template>
+      <el-tooltip
+        v-else
+        :content="getShowValue(value)"
+        :disabled="!name||!showTip"
+        placement="bottom"
+      >
+        <span>{{name||getShowValue(value)}}</span>
+      </el-tooltip>
     </el-radio>
   </el-radio-group>
 </template>
@@ -151,12 +156,12 @@ export default {
   },
   methods: {
     findIndex(list, array) {
-      return list.findIndex(function (item) {
-        return JSON.stringify(item) === JSON.stringify(array)
+      return list.findIndex(function ({ value }) {
+        return JSON.stringify(value) === JSON.stringify(array)
       })
     },
     getSelectLabel(index) {
-      return this.schema.enumNames && this.schema.enumNames[index] || this.getShowValue(this.schema.enum[index])
+      return this.schema.enum[index].name || this.getShowValue(this.schema.enum[index].value)
     },
     getShowValue(value) {
       switch (true) {

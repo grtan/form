@@ -1,4 +1,5 @@
 const MonacoPlugin = require('monaco-editor-webpack-plugin')
+// const path = require('path')
 
 module.exports = {
   chainWebpack: config => {
@@ -7,5 +8,10 @@ module.exports = {
       .use(MonacoPlugin, [{
         languages: ['javascript', 'typescript', 'json']
       }])
+
+    // config.module
+    //   .rule('eslint')
+    //   .exclude
+    //   .add(path.resolve(__dirname, '../src'))
   }
 }

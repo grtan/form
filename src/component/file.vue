@@ -45,13 +45,29 @@ export default {
       type: Object
     },
     value: {
-      required: true,
       type: String
     }
   },
   data() {
     return {
       list: []
+    }
+  },
+  watch: {
+    value: {
+      immediate: true,
+      handler(value) {
+        if (!value) { // 清空
+          this.$refs.upload && this.$refs.upload.clearFiles()
+          this.list = []
+        } else if (!this.list.length || this.list[0].url !== value) { // 初始化或者重置成默认值
+          this.$refs.upload && this.$refs.upload.clearFiles()
+          this.list = [{
+            name: value,
+            url: value
+          }]
+        }
+      }
     }
   },
   methods: {
@@ -67,7 +83,16 @@ export default {
       return this.schema.fileValidator(file, this.onValidateFail)
     },
     onSuccess(res, file) {
-      const url = this.schema.urlFetcher(file.response)
+      let url
+
+      if (typeof this.schema.urlFetcher === 'string') {
+        const response = file.response
+        const fn = new Function('response', `return (${this.schema.urlFetcher})`)
+
+        url = fn(response)
+      } else {
+        url = this.schema.urlFetcher(file.response)
+      }
 
       this.$refs.upload.clearFiles()
       this.list = [{
@@ -77,7 +102,7 @@ export default {
       this.$emit('input', url)
     },
     onDelete() {
-      this.$emit('input', '')
+      this.$emit('input', undefined)
     }
   }
 }

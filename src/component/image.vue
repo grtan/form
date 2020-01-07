@@ -109,7 +109,7 @@ export default {
       required: true
     },
     value: {
-      required: true
+      type: String
     }
   },
   data() {
@@ -134,8 +134,9 @@ export default {
 
       if (typeof this.schema.urlFetcher === 'string') {
         const response = file.response
+        const fn = new Function('response', `return (${this.schema.urlFetcher})`)
 
-        url = eval(this.schema.urlFetcher)
+        url = fn(response)
       } else {
         url = this.schema.urlFetcher(file.response)
       }
@@ -150,7 +151,7 @@ export default {
       this.$refs.box.click()
     },
     onDelete() {
-      this.$emit('input', '')
+      this.$emit('input', undefined)
     }
   }
 }
