@@ -9,6 +9,10 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home
+  },
+  {
+    path: '/gen',
+    component: ()=>import('../generator/index')
   }
 ]
 
