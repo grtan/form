@@ -12,7 +12,7 @@ const routes = [
   },
   {
     path: '/gen',
-    component: ()=>import('../generator/index')
+    component: () => import('../generator/index')
   }
 ]
 
