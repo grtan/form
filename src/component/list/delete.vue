@@ -4,6 +4,14 @@
   </el-button>
 </template>
 
+<style lang="less">
+.fm-list-delete {
+  &__root {
+    margin: 0 3px;
+  }
+}
+</style>
+
 <script>
 import axios from 'axios'
 
@@ -42,7 +50,7 @@ export default {
         type: 'warning'
       })
 
-      this.schema.delete(JSON.parse(JSON.stringify(this.list[this.index])), axios, (fail) => {
+      this.schema.delete(this.list[this.index], axios, (fail) => {
         if (fail) {
           this.$message.error('删除失败')
           return

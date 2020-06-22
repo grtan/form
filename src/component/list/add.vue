@@ -12,13 +12,6 @@
   </span>
 </template>
 
-<style lang="less">
-.fm-list-edit {
-  &__root {
-  }
-}
-</style>
-
 <script>
 import axios from 'axios'
 import VForm from '../../index'

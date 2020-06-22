@@ -16,6 +16,7 @@
 <style lang="less">
 .fm-list-edit {
   &__root {
+    margin: 0 3px;
   }
 }
 </style>
@@ -73,7 +74,12 @@ export default {
       Object.keys(this.schema.properties).forEach(prop => {
         if (this.schema.properties[prop].showInEdit) {
           editSchema.required.push(prop)
-          editSchema.properties[prop] = this.schema.properties[prop]
+          editSchema.properties[prop] = { ...this.schema.properties[prop] }
+
+          // 主键不能修改
+          if (this.schema.properties[prop].primary) {
+            editSchema.properties[prop].readonly = true
+          }
         }
       })
 
@@ -82,7 +88,7 @@ export default {
   },
   methods: {
     async submit (value) {
-      this.schema.edit(value, axios, (fail) => {
+      this.schema.edit({ ...this.list[this.index], ...value }, axios, (fail) => {
         if (fail) {
           this.$message.error('修改失败')
           return
