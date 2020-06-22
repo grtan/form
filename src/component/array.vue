@@ -15,10 +15,18 @@
           @input="$event!==value[index]&&$set(value,index,$event)"
           @validate="$emit('validate',index,$event)"
           @destroy="$emit('destroy',index)"
-        ></v-item>
+        />
       </el-col>
-      <el-col class="fm-array__delete" :span="3">
-        <el-button type="danger" @click="onDelete(index)">删除</el-button>
+      <el-col
+        class="fm-array__delete"
+        :span="3"
+      >
+        <el-button
+          type="danger"
+          @click="onDelete(index)"
+        >
+          删除
+        </el-button>
       </el-col>
     </el-row>
   </div>
@@ -38,7 +46,7 @@ import VItem from './item'
 
 export default {
   components: {
-    VItem(resolve) {
+    VItem (resolve) {
       resolve(VItem)
     }
   },
@@ -53,7 +61,7 @@ export default {
     }
   },
   methods: {
-    onAdd() {
+    onAdd () {
       let { type, default: defaultValue } = this.schema.items
       let value
 
@@ -78,10 +86,10 @@ export default {
 
       this.value.push(value)
     },
-    onDelete(index) {
+    onDelete (index) {
       this.value.splice(index, 1)
     },
-    validate() { // 校验整个表单
+    validate () { // 校验整个表单
       ; (this.$refs.items || []).forEach(function (item) {
         item.validate()
       })

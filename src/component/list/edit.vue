@@ -1,0 +1,98 @@
+<template>
+  <span class="fm-list-edit__root">
+    <el-button type="text" @click="show=true">
+      编辑
+    </el-button>
+    <el-dialog :visible.sync="show" append-to-body>
+      <v-form
+        :schema="editSchema"
+        :default-value="list[index]"
+        :submit="submit"
+      />
+    </el-dialog>
+  </span>
+</template>
+
+<style lang="less">
+.fm-list-edit {
+  &__root {
+  }
+}
+</style>
+
+<script>
+import axios from 'axios'
+import VForm from '../../index'
+
+export default {
+  components: {
+    VForm (resolve) {
+      resolve(VForm)
+    }
+  },
+  props: {
+    schema: {
+      type: Object,
+      required: true
+    },
+    list: {
+      type: Array,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    },
+    search: {
+      type: Object,
+      required: true
+    },
+    selection: {
+      type: Array,
+      required: true
+    },
+    actions: {
+      type: Object,
+      required: true
+    }
+  },
+  data () {
+    return {
+      show: false
+    }
+  },
+  computed: {
+    editSchema () {
+      const editSchema = {
+        title: '编辑',
+        type: 'object',
+        required: [],
+        properties: {}
+      }
+
+      Object.keys(this.schema.properties).forEach(prop => {
+        if (this.schema.properties[prop].showInEdit) {
+          editSchema.required.push(prop)
+          editSchema.properties[prop] = this.schema.properties[prop]
+        }
+      })
+
+      return editSchema
+    }
+  },
+  methods: {
+    async submit (value) {
+      this.schema.edit(value, axios, (fail) => {
+        if (fail) {
+          this.$message.error('修改失败')
+          return
+        }
+
+        this.$message.success('修改成功')
+        this.show = false
+        this.actions.query()
+      })
+    }
+  }
+}
+</script>

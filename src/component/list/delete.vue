@@ -1,0 +1,57 @@
+<template>
+  <el-button class="fm-list-delete__root" type="text" @click="onDelete">
+    删除
+  </el-button>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+  props: {
+    schema: {
+      type: Object,
+      required: true
+    },
+    list: {
+      type: Array,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    },
+    search: {
+      type: Object,
+      required: true
+    },
+    selection: {
+      type: Array,
+      required: true
+    },
+    actions: {
+      type: Object,
+      required: true
+    }
+  },
+  methods: {
+    async onDelete () {
+      await this.$confirm('确定删除该项？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+
+      this.schema.delete(JSON.parse(JSON.stringify(this.list[this.index])), axios, (fail) => {
+        if (fail) {
+          this.$message.error('删除失败')
+          return
+        }
+
+        this.$message.success('删除成功')
+        this.actions.query()
+      })
+    }
+  }
+}
+</script>

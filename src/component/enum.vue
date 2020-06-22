@@ -1,7 +1,7 @@
 <template>
   <!-- select -->
   <el-select
-    v-if="isSelect"
+    v-if="schema.enum instanceof Array&&isSelect"
     class="fm-enum__root"
     :value="fixedValue"
     :disabled="schema.readonly"
@@ -16,14 +16,14 @@
       :style="schema.type==='string'&&schema.format==='color'?{background:value}:{}"
     >
       <div v-if="name&&showTip" class="fm-enum__select-item">
-        <span class="fm-enum__select-item--left">{{name}}</span>
-        <span class="fm-enum__select-item--right">{{getShowValue(value)}}</span>
+        <span class="fm-enum__select-item--left">{{ name }}</span>
+        <span class="fm-enum__select-item--right">{{ getShowValue(value) }}</span>
       </div>
     </el-option>
   </el-select>
   <!-- radio -->
   <el-radio-group
-    v-else
+    v-else-if="schema.enum instanceof Array"
     class="fm-enum__root"
     :value="fixedValue"
     :disabled="schema.readonly"
@@ -41,8 +41,8 @@
         :disabled="!showTip"
         placement="bottom"
       >
-        <span v-if="name" :style="{color:value}">{{name}}</span>
-        <span v-else class="fm-enum__color" :style="{background:value}"></span>
+        <span v-if="name" :style="{color:value}">{{ name }}</span>
+        <span v-else class="fm-enum__color" :style="{background:value}" />
       </el-tooltip>
 
       <!-- image、video -->
@@ -52,7 +52,7 @@
         :disabled="!showTip"
         placement="bottom"
       >
-        <v-image :schema="Object.assign({},schema,{readonly:true})" :value="value"></v-image>
+        <v-image :schema="Object.assign({},schema,{readonly:true})" :value="value" />
       </el-tooltip>
 
       <!-- file -->
@@ -62,8 +62,10 @@
         :disabled="!name||!showTip"
         placement="bottom"
       >
-        <el-link v-if="download" :href="value" target="_blank">{{name||value}}</el-link>
-        <span v-else>{{name||value}}</span>
+        <el-link v-if="download" :href="value" target="_blank">
+          {{ name||value }}
+        </el-link>
+        <span v-else>{{ name||value }}</span>
       </el-tooltip>
 
       <!-- 其他 -->
@@ -73,10 +75,38 @@
         :disabled="!name||!showTip"
         placement="bottom"
       >
-        <span>{{name||getShowValue(value)}}</span>
+        <span>{{ name||getShowValue(value) }}</span>
       </el-tooltip>
     </el-radio>
   </el-radio-group>
+  <!-- 通过接口查询 -->
+  <div v-else class="fm-enum__root">
+    <el-button type="text" @click="show=true">
+      选择
+    </el-button>
+    <el-dialog class="fm-enum__list" :visible.sync="show" width="70%" append-to-body>
+      <v-list :schema="getListSchema(schema.enum)" />
+    </el-dialog>
+    <el-table v-if="fixedValue.length" :data="fixedValue" height="auto">
+      <template v-for="(propSchema,prop) in schema.enum.properties">
+        <el-table-column
+          v-if="propSchema.showInTable===undefined||propSchema.showInTable"
+          :key="prop"
+          align="center"
+          :label="propSchema.title"
+        >
+          <component
+            :is="propSchema.displayComponent()"
+            v-if="typeof propSchema.displayComponent==='function'"
+            slot-scope="scope"
+            :schema="propSchema"
+            :value="scope.row[prop]"
+          />
+          <v-display v-else slot-scope="scope" :schema="propSchema" :value="scope.row[prop]" />
+        </el-table-column>
+      </template>
+    </el-table>
+  </div>
 </template>
 
 <style lang="less">
@@ -91,6 +121,11 @@
         display: inline-block;
         vertical-align: middle;
       }
+    }
+
+    > .el-table {
+      margin-top: 10px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -110,15 +145,31 @@
     width: 20px;
     height: 20px;
   }
+
+  &__list {
+    > .el-dialog {
+      > .el-dialog__body {
+        > .fm-list__root {
+          max-height: 65vh;
+          min-height: 45vh;
+        }
+      }
+    }
+  }
 }
 </style>
 
 <script>
 import VImage from './image'
+import VList from './list/index'
+import VSelect from './list/select'
+import VDisplay from './list/display'
 
 export default {
   components: {
-    VImage
+    VImage,
+    VList,
+    VDisplay
   },
   props: {
     schema: {
@@ -129,8 +180,26 @@ export default {
       required: true
     }
   },
+  data () {
+    // 从接口获取数据时的主属性
+    const primary = this.schema.enum instanceof Array ? '' : Object.keys(this.schema.enum.properties).find(prop => {
+      return this.schema.enum.properties[prop].primary
+    })
+
+    if (primary === undefined) {
+      throw new Error('当schema.enum为对象时，properties中必须要存在唯一的primary属性')
+    }
+
+    return {
+      show: false,
+      primary,
+      list: (this.schema.enum instanceof Array || this.value === undefined) ? [] : [{
+        [primary]: this.value
+      }]
+    }
+  },
   computed: {
-    isSelect() {
+    isSelect () {
       if (this.schema.component === 'select') {
         if (this.schema.type === 'string') {
           return !['image', 'video', 'file'].includes(this.schema.format)
@@ -141,10 +210,15 @@ export default {
 
       return false
     },
-    isBase() {
+    isBase () {
       return !['address', 'range'].includes(this.schema.type)
     },
-    fixedValue() {
+    fixedValue () {
+      // 从接口获取数据
+      if (!(this.schema.enum instanceof Array)) {
+        return this.list
+      }
+
       if (!this.isBase) {
         const index = this.findIndex(this.schema.enum, this.value)
 
@@ -155,15 +229,15 @@ export default {
     }
   },
   methods: {
-    findIndex(list, array) {
+    findIndex (list, array) {
       return list.findIndex(function ({ value }) {
         return JSON.stringify(value) === JSON.stringify(array)
       })
     },
-    getSelectLabel(index) {
+    getSelectLabel (index) {
       return this.schema.enum[index].name || this.getShowValue(this.schema.enum[index].value)
     },
-    getShowValue(value) {
+    getShowValue (value) {
       switch (true) {
         case this.schema.type === 'address':
           return value.join(' ')
@@ -171,6 +245,31 @@ export default {
           return value.join(' ～ ')
         default:
           return value
+      }
+    },
+    // 获取list组件schema
+    getListSchema (schema) {
+      const self = this
+      const operations = typeof schema.rowOperations === 'function' ? schema.rowOperations() : []
+      const Select = {
+        ...VSelect,
+        methods: {
+          onClick () {
+            self.show = false
+            self.list = [this.list[this.index]]
+            self.$listeners.input(this.list[this.index][self.primary])
+          }
+        }
+      }
+
+      return {
+        ...schema,
+        rowOperations () {
+          return [
+            ...operations,
+            Select
+          ]
+        }
       }
     }
   }
