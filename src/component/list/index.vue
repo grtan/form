@@ -52,7 +52,7 @@
         :actions="actions"
       />
     </div>
-    <el-table :data="list" height="auto" @selection-change="onSelectionChange">
+    <el-table :data="list" v-bind="tableConfig" @selection-change="onSelectionChange">
       <el-table-column v-if="schema.selection" type="selection" align="center" />
       <template v-for="(propSchema,prop) in schema.properties">
         <el-table-column
@@ -79,19 +79,21 @@
       >
         <template slot-scope="scope">
           <v-edit
-            v-if="schema.edit"
+            v-if="schema.edit&&(scope.row.showEdit===undefined||!!scope.row.showEdit)"
             :schema="schema"
             :list="list"
             :index="scope.$index"
+            :row="scope.row"
             :search="search"
             :selection="selection"
             :actions="actions"
           />
           <v-delete
-            v-if="schema.delete"
+            v-if="schema.delete&&(scope.row.showDelete===undefined||!!scope.row.showDelete)"
             :schema="schema"
             :list="list"
             :index="scope.$index"
+            :row="scope.row"
             :search="search"
             :selection="selection"
             :actions="actions"
@@ -104,6 +106,7 @@
               :schema="schema"
               :list="list"
               :index="scope.$index"
+              :row="scope.row"
               :search="search"
               :selection="selection"
               :actions="actions"
@@ -114,11 +117,12 @@
       <el-table-column v-if="typeof schema.expand==='function'" type="expand">
         <component
           :is="schema.expand()"
-          slot-scope="props"
-          :slotscope="props"
+          slot-scope="scope"
+          :slotscope="scope"
           :schema="schema"
           :list="list"
           :index="scope.$index"
+          :row="scope.row"
           :search="search"
           :selection="selection"
           :actions="actions"
@@ -233,6 +237,14 @@ export default {
       return Object.keys(this.schema.properties).filter(prop => {
         return this.schema.properties[prop].showInSearch
       })
+    },
+    tableConfig() {
+      return {
+        ...{
+          height: 'auto'
+        },
+        ...this.schema.table
+      }
     }
   },
   watch: {

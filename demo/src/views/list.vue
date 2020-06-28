@@ -62,18 +62,27 @@ import { List as VcList } from 'vcform'
 const monaco = { editor, MarkerSeverity }
 const code = (function () {
   const code = function () {
+    var children = {}
     var data = {
       pageSize: 10,
       list: (function () {
         var list = []
+        var hasChildren
 
         for (var i = 0; i < 33; i++) {
+          hasChildren = Math.random() > 0.5
+
+          if (hasChildren) {
+            children['code' + i] = []
+          }
+
           list.push({
             code: 'code' + i,
             name: '名称' + i,
             scene: '场景' + parseInt(Math.random() * 6),
             status: parseInt(Math.random() * 3),
-            desc: '描述' + i
+            desc: '描述' + i,
+            hasChildren
           })
         }
 
@@ -170,8 +179,6 @@ const code = (function () {
       query (search, axios, callback) {
         const list = []
 
-        console.log(search)
-
         data.list.forEach(function (item) {
           if (search.code && !item.code.includes(search.code)) {
             return
@@ -197,15 +204,50 @@ const code = (function () {
         callback()
       },
       edit (value, axios, callback) {
-        data.list.splice(data.list.findIndex(function (item) {
+        var index = data.list.findIndex(function (item) {
           return item.code === value.code
-        }), 1, value)
+        })
+
+        if (index !== -1) {
+          data.list.splice(index, 1, value)
+        } else {
+          // 子级数据
+          Object.keys(children).find(function (key) {
+            index = children[key].findIndex(function (item) {
+              return item.code === value.code
+            })
+
+            if (index !== -1) {
+              children[key].splice(index, 1, value)
+              return true
+            }
+          })
+        }
+
         callback()
       },
       delete (value, axios, callback) {
-        data.list.splice(data.list.findIndex(function (item) {
+        var index = data.list.findIndex(function (item) {
           return item.code === value.code
-        }), 1)
+        })
+
+        if (index !== -1) {
+          data.list.splice(index, 1)
+        } else {
+          // 子级数据
+          Object.keys(children).find(function (key) {
+            index = children[key].findIndex(function (item) {
+              return item.code === value.code
+            })
+
+            if (index !== -1) {
+              console.log(key, index)
+              children[key].splice(index, 1)
+              return true
+            }
+          })
+        }
+
         callback()
       },
       multiDelete (selection, axios, callback) {
@@ -215,6 +257,30 @@ const code = (function () {
           }), 1)
         })
         callback()
+      },
+      table: {
+        stripe: true,
+        'row-key': 'code',
+        lazy: true,
+        load (tree, treeNode, resolve) {
+          var len = 1 + Math.random() * 3
+
+          for (let i = 0; i < len; i++) {
+            children[tree.code].push({
+              code: tree.code + '-' + i,
+              name: '名称' + i,
+              scene: '场景' + parseInt(Math.random() * 6),
+              status: parseInt(Math.random() * 3),
+              desc: '描述' + i,
+              showEdit: Math.random() > 0.5,
+              showDelete: Math.random() > 0.5
+            })
+          }
+
+          setTimeout(function () {
+            resolve(children[tree.code])
+          }, 1000)
+        }
       }
     }
   }

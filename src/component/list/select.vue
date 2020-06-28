@@ -19,6 +19,10 @@ export default {
       type: Number,
       required: true
     },
+    row: {
+      type: Object,
+      required: true
+    },
     search: {
       type: Object,
       required: true

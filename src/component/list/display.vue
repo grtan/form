@@ -1,7 +1,12 @@
 <template>
   <div class="fm-display__root">
+    <!-- 带label的枚举 -->
+    <div v-if="label" class="fm-display__text" :title="label">
+      {{ label }}
+    </div>
+
     <!-- 字符串 -->
-    <template v-if="schema.type==='string'">
+    <template v-else-if="schema.type==='string'">
       <!-- 颜色 -->
       <el-tooltip v-if="schema.format==='color'" :content="value">
         <el-color-picker
@@ -73,6 +78,11 @@
 
 <style lang="less">
 .fm-display {
+  &__root {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
   &__text {
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -100,6 +110,23 @@ export default {
     },
     value: {
       required: true
+    }
+  },
+  computed: {
+    label(){
+      if(!(this.schema.enum instanceof Array)){
+        return ''
+      }
+
+      const item=this.schema.enum.find(({value})=>{
+        if(['address', 'range'].includes(this.schema.type)){
+          return JSON.stringify(value) === JSON.stringify(this.value)
+        }
+
+        return value===this.value
+      })
+
+      return item && item.name
     }
   }
 }

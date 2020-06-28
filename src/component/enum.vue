@@ -256,8 +256,8 @@ export default {
         methods: {
           onClick () {
             self.show = false
-            self.list = [this.list[this.index]]
-            self.$listeners.input(this.list[this.index][self.primary])
+            self.list = [this.row]
+            self.$listeners.input(this.row[self.primary])
           }
         }
       }

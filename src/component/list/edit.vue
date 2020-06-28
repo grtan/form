@@ -6,7 +6,7 @@
     <el-dialog :visible.sync="show" append-to-body>
       <v-form
         :schema="editSchema"
-        :default-value="list[index]"
+        :default-value="row"
         :submit="submit"
       />
     </el-dialog>
@@ -42,6 +42,10 @@ export default {
     },
     index: {
       type: Number,
+      required: true
+    },
+    row: {
+      type: Object,
       required: true
     },
     search: {
@@ -88,7 +92,7 @@ export default {
   },
   methods: {
     async submit (value) {
-      this.schema.edit({ ...this.list[this.index], ...value }, axios, (fail) => {
+      this.schema.edit({ ...this.row, ...value }, axios, (fail) => {
         if (fail) {
           this.$message.error('修改失败')
           return

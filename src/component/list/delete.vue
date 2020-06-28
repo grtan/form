@@ -29,6 +29,10 @@ export default {
       type: Number,
       required: true
     },
+    row: {
+      type: Object,
+      required: true
+    },
     search: {
       type: Object,
       required: true
@@ -50,7 +54,7 @@ export default {
         type: 'warning'
       })
 
-      this.schema.delete(this.list[this.index], axios, (fail) => {
+      this.schema.delete(this.row, axios, (fail) => {
         if (fail) {
           this.$message.error('删除失败')
           return
