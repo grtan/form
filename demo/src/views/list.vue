@@ -305,7 +305,6 @@ const code = (function () {
             })
 
             if (index !== -1) {
-              console.log(key, index)
               children[key].splice(index, 1)
               return true
             }
