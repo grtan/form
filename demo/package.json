@@ -9,6 +9,7 @@
     "demo": "node server.js"
   },
   "dependencies": {
+    "core-js": "^3.6.5",
     "element-ui": "^2.13.0",
     "koa": "^2.11.0",
     "koa-static": "^5.0.0",

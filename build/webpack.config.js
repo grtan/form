@@ -7,13 +7,12 @@ const nodeExternals = require('webpack-node-externals')
 module.exports = {
   mode: 'production',
   entry: {
-    vcform: './src/index.vue'
+    vcform: './src/index.js'
   },
   output: {
     path: path.resolve(process.cwd(), './dist'),
     filename: '[name].js',
     library: 'VCForm',
-    libraryExport: 'default',
     libraryTarget: 'umd'
   },
   resolve: {

@@ -109,21 +109,22 @@ export default {
       required: true
     },
     value: {
-      required: true
+      type: [String, Number, Boolean, Object, Array],
+      default: undefined
     }
   },
   computed: {
-    label(){
-      if(!(this.schema.enum instanceof Array)){
+    label () {
+      if (!(this.schema.enum instanceof Array)) {
         return ''
       }
 
-      const item=this.schema.enum.find(({value})=>{
-        if(['address', 'range'].includes(this.schema.type)){
+      const item = this.schema.enum.find(({ value }) => {
+        if (['address', 'range'].includes(this.schema.type)) {
           return JSON.stringify(value) === JSON.stringify(this.value)
         }
 
-        return value===this.value
+        return value === this.value
       })
 
       return item && item.name

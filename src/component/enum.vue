@@ -9,15 +9,15 @@
     @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
   >
     <el-option
-      v-for="({value,name,showTip},index) in schema.enum"
+      v-for="({value:enumValue,name,showTip},index) in schema.enum"
       :key="index"
       :label="getSelectLabel(index)"
-      :value="isBase?value:index"
-      :style="schema.type==='string'&&schema.format==='color'?{background:value}:{}"
+      :value="isBase?enumValue:index"
+      :style="schema.type==='string'&&schema.format==='color'?{background:enumValue}:{}"
     >
       <div v-if="name&&showTip" class="fm-enum__select-item">
         <span class="fm-enum__select-item--left">{{ name }}</span>
-        <span class="fm-enum__select-item--right">{{ getShowValue(value) }}</span>
+        <span class="fm-enum__select-item--right">{{ getShowValue(enumValue) }}</span>
       </div>
     </el-option>
   </el-select>
@@ -30,52 +30,52 @@
     @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
   >
     <el-radio
-      v-for="({value,name,showTip,download},index) in schema.enum"
+      v-for="({value:enumValue,name,showTip,download},index) in schema.enum"
       :key="index"
-      :label="isBase?value:index"
+      :label="isBase?enumValue:index"
     >
       <!-- color -->
       <el-tooltip
         v-if="schema.type==='string'&&schema.format==='color'"
-        :content="value"
+        :content="enumValue"
         :disabled="!showTip"
         placement="bottom"
       >
-        <span v-if="name" :style="{color:value}">{{ name }}</span>
-        <span v-else class="fm-enum__color" :style="{background:value}" />
+        <span v-if="name" :style="{color:enumValue}">{{ name }}</span>
+        <span v-else class="fm-enum__color" :style="{background:enumValue}" />
       </el-tooltip>
 
       <!-- image、video -->
       <el-tooltip
         v-else-if="schema.type==='string'&&['image','video'].includes(schema.format)"
-        :content="name||value"
+        :content="name||enumValue"
         :disabled="!showTip"
         placement="bottom"
       >
-        <v-image :schema="Object.assign({},schema,{readonly:true})" :value="value" />
+        <v-image :schema="Object.assign({},schema,{readonly:true})" :value="enumValue" />
       </el-tooltip>
 
       <!-- file -->
       <el-tooltip
         v-else-if="schema.type==='string'&&['file'].includes(schema.format)"
-        :content="value"
+        :content="enumValue"
         :disabled="!name||!showTip"
         placement="bottom"
       >
-        <el-link v-if="download" :href="value" target="_blank">
-          {{ name||value }}
+        <el-link v-if="download" :href="enumValue" target="_blank">
+          {{ name||enumValue }}
         </el-link>
-        <span v-else>{{ name||value }}</span>
+        <span v-else>{{ name||enumValue }}</span>
       </el-tooltip>
 
       <!-- 其他 -->
       <el-tooltip
         v-else
-        :content="getShowValue(value)"
+        :content="getShowValue(enumValue)"
         :disabled="!name||!showTip"
         placement="bottom"
       >
-        <span>{{ name||getShowValue(value) }}</span>
+        <span>{{ name||getShowValue(enumValue) }}</span>
       </el-tooltip>
     </el-radio>
   </el-radio-group>
@@ -168,8 +168,10 @@ import VDisplay from './list/display'
 export default {
   components: {
     VImage,
-    VList,
-    VDisplay
+    VDisplay,
+    VList (resolve) {
+      resolve(VList)
+    }
   },
   props: {
     schema: {
@@ -177,7 +179,8 @@ export default {
       required: true
     },
     value: {
-      required: true
+      type: [String, Number, Boolean, Array],
+      default: undefined
     }
   },
   data () {

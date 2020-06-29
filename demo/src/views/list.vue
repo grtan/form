@@ -98,14 +98,20 @@ const code = (function () {
           primary: true,
           showInSearch: true,
           showInAdd: true,
-          showInEdit: true
+          showInEdit: true,
+          tableColumn: {
+            align: 'center'
+          }
         },
         name: {
           title: '名称',
           type: 'string',
           showInSearch: true,
           showInAdd: true,
-          showInEdit: true
+          showInEdit: true,
+          tableColumn: {
+            align: 'center'
+          }
         },
         scene: {
           title: '场景',
@@ -117,16 +123,25 @@ const code = (function () {
               code: {
                 title: '编码',
                 type: 'string',
-                primary: true
+                primary: true,
+                tableColumn: {
+                  align: 'center'
+                }
               },
               name: {
                 title: '名称',
-                type: 'string'
+                type: 'string',
+                tableColumn: {
+                  align: 'center'
+                }
               },
               desc: {
                 title: '描述',
                 type: 'string',
-                component: 'textarea'
+                component: 'textarea',
+                tableColumn: {
+                  align: 'center'
+                }
               }
             },
             query (search, axios, callback) {
@@ -147,6 +162,9 @@ const code = (function () {
                 }())
               })
             }
+          },
+          tableColumn: {
+            align: 'center'
           }
         },
         status: {
@@ -164,18 +182,64 @@ const code = (function () {
           }],
           component: 'select',
           showInAdd: true,
-          showInEdit: true
+          showInEdit: true,
+          tableColumn: {
+            align: 'center'
+          }
         },
         desc: {
           title: '描述',
           type: 'string',
           component: 'textarea',
           showInAdd: true,
-          showInEdit: true
+          showInEdit: true,
+          tableColumn: {
+            align: 'center'
+          }
         }
       },
       pagination: true,
-      selection: true,
+      table: {
+        stripe: true,
+        'row-key': 'code',
+        lazy: true,
+        load (tree, treeNode, resolve) {
+          var len = 1 + Math.random() * 3
+
+          for (let i = 0; i < len; i++) {
+            children[tree.code].push({
+              code: tree.code + '-' + i,
+              name: '名称' + i,
+              scene: '场景' + parseInt(Math.random() * 6),
+              status: parseInt(Math.random() * 3),
+              desc: '描述' + i,
+              showEdit: Math.random() > 0.5,
+              showDelete: Math.random() > 0.5
+            })
+          }
+
+          setTimeout(function () {
+            resolve(children[tree.code])
+          }, 1000)
+        }
+      },
+      tableSelection: {
+        align: 'center',
+        'reserve-selection': true
+      },
+      tableIndex: {
+        align: 'center'
+      },
+      // tableExpand: {
+      //   align: 'center',
+      //   slotComponent () {
+      //     return {
+      //       render (h) {
+      //         return h('div', '展开行内容')
+      //       }
+      //     }
+      //   }
+      // },
       query (search, axios, callback) {
         const list = []
 
@@ -257,36 +321,12 @@ const code = (function () {
           }), 1)
         })
         callback()
-      },
-      table: {
-        stripe: true,
-        'row-key': 'code',
-        lazy: true,
-        load (tree, treeNode, resolve) {
-          var len = 1 + Math.random() * 3
-
-          for (let i = 0; i < len; i++) {
-            children[tree.code].push({
-              code: tree.code + '-' + i,
-              name: '名称' + i,
-              scene: '场景' + parseInt(Math.random() * 6),
-              status: parseInt(Math.random() * 3),
-              desc: '描述' + i,
-              showEdit: Math.random() > 0.5,
-              showDelete: Math.random() > 0.5
-            })
-          }
-
-          setTimeout(function () {
-            resolve(children[tree.code])
-          }, 1000)
-        }
       }
     }
   }
   var fn = code.toString()
 
-  return fn.slice(fn.indexOf('{') + 1, fn.lastIndexOf('}'))
+  return fn.slice(fn.indexOf('{') + 1, fn.lastIndexOf('}')).replace(/^\s{4}/gm, '')
 }())
 
 export default {

@@ -13,7 +13,89 @@
 - 区域5：批量选择区域
 - 区域6：有时候数据很多时需要进行分页，该区域显示分页组件
 
+## [playground](http://vui.vivo.xyz:9002/#/list)
+
 ## 用法
+
+```html
+<template>
+  <vc-list :schema="schema" />
+</template>
+
+<script>
+import { List as VcList } from 'vcform'
+
+export default {
+  components: {
+    VcList
+  },
+  data() {
+    return {
+      schema: {
+        properties: {
+          code: {
+            title: '编码',
+            type: 'string',
+            primary: true,
+            showInSearch: true,
+            showInAdd: true,
+            showInEdit: true,
+            tableColumn: {
+              align: 'center'
+            }
+          },
+          name: {
+            title: '名称',
+            type: 'string',
+            showInSearch: true,
+            showInAdd: true,
+            showInEdit: true,
+            tableColumn: {
+              align: 'center'
+            }
+          },
+          desc: {
+            title: '描述',
+            type: 'string',
+            component: 'textarea',
+            showInAdd: true,
+            showInEdit: true,
+            tableColumn: {
+              align: 'center'
+            }
+          }
+        },
+        pagination: true,
+        table: {
+          stripe: true
+        },
+        tableSelection: {
+          align: 'center'
+        },
+        tableIndex: {
+          align: 'center'
+        },
+        query (search, axios, callback) {
+          xxx
+        },
+        add (value, axios, callback) {
+          xx
+        },
+        edit (value, axios, callback) {
+          xxx
+        },
+        delete (value, axios, callback) {
+          xx
+        },
+        multiDelete (selection, axios, callback) {
+          xx
+        }
+      }
+    }
+  }
+}
+</script>
+```
 
 ## schema
 
@@ -27,8 +109,13 @@
 |    properties.xx.showInAdd     | `Boolean`  |  `N`  | `false` |                                                                                                                                                                           表示列表元素数据的xx属性是否在默认新增界面的表单中显示                                                                                                                                                                            |
 |    properties.xx.showInEdit    | `Boolean`  |  `N`  | `false` |                                                                                                                                                                           表示列表元素数据的xx属性是否在默认编辑界面的表单中显示                                                                                                                                                                            |
 | properties.xx.displayComponent | `Function` |  `N`  |   `-`   |                                                                                                                        自定义列表元素数据的xx属性在表格单元格中的显示，该函数返回vue组件对象。该组件接受`schema`、`value`两个prop，schema表示xx属性的schema规范，value表示xx属性的值                                                                                                                        |
+|   properties.xx.tableColumn    |  `Object`  |  `N`  |   `-`   |                                                                                                      element-ui的[table-column属性](https://element.eleme.io/#/zh-CN/component/table#table-column-attributes)，支持除了`type`、`index`、`label`、`prop`、`selectable`、`reserve-selection`外的所有属性                                                                                                      |
+|             table              |  `Object`  |  `N`  |   `-`   |                                                                                                                                            element-ui的[table属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)，支持除了`data`的所有属性                                                                                                                                             |
+|         tableSelection         |  `Object`  |  `N`  |   `-`   |                                                                  是否开启批量选择，默认不开启。支持[table-column属性](https://element.eleme.io/#/zh-CN/component/table#table-column-attributes)的`selectable`、`reserve-selection`、`width`、`min-width`、`fixed`、`resizable`、`align`、`header-align`、`class-name`、`label-class-name`                                                                   |
+|           tableIndex           |  `Object`  |  `N`  |   `-`   |                                                                                是否开启索引列，默认不开启。支持[table-column属性](https://element.eleme.io/#/zh-CN/component/table#table-column-attributes)的`index`、`width`、`min-width`、`fixed`、`resizable`、`align`、`header-align`、`class-name`、`label-class-name`                                                                                 |
+|          tableExpand           |  `Object`  |  `N`  |   `-`   |                                   是否开启[展开行](https://element.eleme.io/#/zh-CN/component/table#zhan-kai-xing)，默认不开启。支持[table-column属性](https://element.eleme.io/#/zh-CN/component/table#table-column-attributes)的`width`、`min-width`、`fixed`、`resizable`、`align`、`header-align`、`class-name`、`label-class-name`，还支持`slotComponent`属性，如下                                    |
+|   tableExpand.slotComponent    | `Function` |  `Y`  |   `-`   |                                                                                                                                          返回自定义的展开行组件，该组件接受的props与rowOperations组件一致，另外还接受slotscope属性，格式为{ row, column, $index }                                                                                                                                           |
 |           pagination           | `Boolean`  |  `N`  | `false` |                                                                                                                                                                                                  是否分页                                                                                                                                                                                                   |
-|           selection            | `Boolean`  |  `N`  | `false` |                                                                                                                                                                                              是否可以批量选择                                                                                                                                                                                               |
 |             query              | `Function` |  `Y`  |   `-`   | 查询数据的函数，该函数接受参数为(search,axios,callback)。search为查询条件对象，如{id:xx,code:xx,page:1}；axios为axios对象，可以直接使用该对象进行ajax请求；callback为数据回调函数，形式为callback(data)，请求成功后需要将数据传入该回调函数。data格式为{total,page,pageSize,list}，total为总页数，page为当前页码，pageSize为一页显示多少数据，list为实际数据列表，当不需要分页时total、page、pageSize可不填 |
 |              add               | `Function` |  `N`  |   `-`   |                                                                新增数据的函数，不填时表示不显示默认的新增按钮。该函数接受参数为(value,axios,callback)。value为新增的数据对象，如{id:xx,name:xx,project:xx}；axios为axios对象，可以直接使用该对象进行ajax请求；callback为回调函数，当操作成功时调用`callback()`，否则需要调用`callback(true)`                                                                |
 |              edit              | `Function` |  `N`  |   `-`   |                                                                编辑数据的函数，不填时表示不显示默认的行编辑按钮。该函数接受参数为(value,axios,callback)。value为编辑后的行数据对象，如{name:xx,project:xx}；axios为axios对象，可以直接使用该对象进行ajax请求；callback为回调函数，当操作成功时调用`callback()`，否则需要调用`callback(true)`                                                                |
@@ -38,8 +125,6 @@
 |       actions.setSearch        | `Function` |  `-`  |   `-`   |                                                                                                                                               设置List组件的查询条件，形式为setSearch(search)，search为设置的查询条件对象，当不传入search时，表示重置查询条件                                                                                                                                               |
 |         actions.query          | `Function` |  `-`  |   `-`   |                                                                                                                                                                                          以当前的查询条件进行查询                                                                                                                                                                                           |
 |        globalOperations        | `Function` |  `N`  |   `-`   |                                                                                                                                               自定义全局操作的函数，返回自定义操作的组件数组。这些组件接受的props跟rowOperations组件一致，除了没有index、row                                                                                                                                                |
-|             expand             | `Function` |  `N`  |   `-`   |                                                                                               定义[展开行](https://element.eleme.io/#/zh-CN/component/table#zhan-kai-xing)的函数，返回自定义的展开行组件。该组件接受的props与rowOperations组件一致，另外还接受slotscope属性，格式为{ row, column, $index }。                                                                                                |
-|             table              |  `Object`  |  `N`  |   `-`   |                                                                                                                                            element-ui的[table属性](https://element.eleme.io/#/zh-CN/component/table#table-attributes)，支持除了`data`的所有属性                                                                                                                                             |
 
 ## 提示
 

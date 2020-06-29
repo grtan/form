@@ -53,13 +53,28 @@
       />
     </div>
     <el-table :data="list" v-bind="tableConfig" @selection-change="onSelectionChange">
-      <el-table-column v-if="schema.selection" type="selection" align="center" />
+      <el-table-column v-if="schema.tableExpand" type="expand" v-bind="schema.tableExpand">
+        <component
+          :is="schema.tableExpand.slotComponent()"
+          slot-scope="scope"
+          :slotscope="scope"
+          :schema="schema"
+          :list="list"
+          :index="scope.$index"
+          :row="scope.row"
+          :search="search"
+          :selection="selection"
+          :actions="actions"
+        />
+      </el-table-column>
+      <el-table-column v-if="schema.tableSelection" type="selection" v-bind="schema.tableSelection" />
+      <el-table-column v-if="schema.tableIndex" type="index" v-bind="schema.tableIndex" />
       <template v-for="(propSchema,prop) in schema.properties">
         <el-table-column
           v-if="propSchema.showInTable===undefined||!!propSchema.showInTable"
           :key="prop"
-          align="center"
           :label="propSchema.title"
+          v-bind="propSchema.tableColumn||{}"
         >
           <component
             :is="propSchema.displayComponent()"
@@ -113,20 +128,6 @@
             />
           </template>
         </template>
-      </el-table-column>
-      <el-table-column v-if="typeof schema.expand==='function'" type="expand">
-        <component
-          :is="schema.expand()"
-          slot-scope="scope"
-          :slotscope="scope"
-          :schema="schema"
-          :list="list"
-          :index="scope.$index"
-          :row="scope.row"
-          :search="search"
-          :selection="selection"
-          :actions="actions"
-        />
       </el-table-column>
     </el-table>
     <el-pagination
@@ -238,7 +239,7 @@ export default {
         return this.schema.properties[prop].showInSearch
       })
     },
-    tableConfig() {
+    tableConfig () {
       return {
         ...{
           height: 'auto'
