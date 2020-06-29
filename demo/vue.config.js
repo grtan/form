@@ -12,6 +12,10 @@ module.exports = {
     config.resolve
       .symlinks(false)
 
+    // list组件的demo演示代码不能压缩
+    config.optimization
+      .minimize(false)
+
     // config.resolve.alias
     //   .set('vcform', path.resolve(__dirname, '../src/index.vue'))
 
