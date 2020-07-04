@@ -1,9 +1,11 @@
 <template>
-  <el-link v-if="schema.readonly" class="fm-file__root" :href="value" target="_blank">{{value}}</el-link>
+  <el-link v-if="schema.readonly" class="fm-file__root" :href="value" target="_blank">
+    {{ value }}
+  </el-link>
   <el-upload
     v-else
-    class="fm-file__root"
     ref="upload"
+    class="fm-file__root"
     :action="schema.action"
     :name="schema.name"
     :headers="schema.headers"
@@ -14,23 +16,31 @@
     :on-success="onSuccess"
     :on-remove="onDelete"
   >
-    <el-button size="small" type="primary">点击上传</el-button>
+    <el-button size="small" type="primary">
+      点击上传
+    </el-button>
   </el-upload>
 </template>
 
 <style lang="less">
 .fm-file {
   &__root {
-    .el-upload {
-      float: left;
+    div& {
+      display: flex;
+      align-items: center;
     }
 
     .el-upload-list {
-      margin-left: 100px;
-      height: 32px;
+      flex: auto;
+      margin-left: 1em;
+      width: 0;
 
-      .el-upload-list__item {
-        margin-top: 0 !important;
+      &__item {
+        margin-top: 0;
+
+        &:nth-child(2) {
+          height: 0;
+        }
       }
     }
   }
@@ -45,10 +55,11 @@ export default {
       type: Object
     },
     value: {
-      type: String
+      type: String,
+      default: undefined
     }
   },
-  data() {
+  data () {
     return {
       list: []
     }
@@ -56,7 +67,7 @@ export default {
   watch: {
     value: {
       immediate: true,
-      handler(value) {
+      handler (value) {
         if (!value) { // 清空
           this.$refs.upload && this.$refs.upload.clearFiles()
           this.list = []
@@ -71,10 +82,10 @@ export default {
     }
   },
   methods: {
-    onValidateFail(reason) {
+    onValidateFail (reason) {
       reason && this.$emit('input', `validate:${reason}`)
     },
-    onBeforeUpload(file) {
+    onBeforeUpload (file) {
       if (typeof this.schema.fileValidator !== 'function') {
         return
       }
@@ -82,11 +93,12 @@ export default {
       // 检验失败后不会上传文件
       return this.schema.fileValidator(file, this.onValidateFail)
     },
-    onSuccess(res, file) {
+    onSuccess (res, file) {
       let url
 
       if (typeof this.schema.urlFetcher === 'string') {
         const response = file.response
+        // eslint-disable-next-line no-new-func
         const fn = new Function('response', `return (${this.schema.urlFetcher})`)
 
         url = fn(response)
@@ -101,7 +113,7 @@ export default {
       }]
       this.$emit('input', url)
     },
-    onDelete() {
+    onDelete () {
       this.$emit('input', undefined)
     }
   }

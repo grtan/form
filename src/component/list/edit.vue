@@ -1,6 +1,6 @@
 <template>
   <span class="fm-list-edit__root">
-    <el-button type="text" @click="show=true">
+    <el-button type="text" @click.stop="show=true">
       编辑
     </el-button>
     <el-dialog :visible.sync="show" append-to-body>

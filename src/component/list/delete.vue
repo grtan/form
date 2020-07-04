@@ -1,5 +1,5 @@
 <template>
-  <el-button class="fm-list-delete__root" type="text" @click="onDelete">
+  <el-button class="fm-list-delete__root" type="text" @click.stop="onDelete">
     删除
   </el-button>
 </template>

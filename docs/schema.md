@@ -157,10 +157,12 @@
 
 `object`类型支持的属性如下
 
-|    名称    |      类型       | 必填  | 默认值 |        描述        |
-| :--------: | :-------------: | :---: | :----: | :----------------: |
-| properties |    `Object`     |  `Y`  |  `-`   | 描述各属性的schema |
-|  required  | `Array<String>` |  `N`  |  `-`   | 必须属性名称的数组 |
+|    名称    |      类型       | 必填  | 默认值 |                                                      描述                                                      |
+| :--------: | :-------------: | :---: | :----: | :------------------------------------------------------------------------------------------------------------: |
+| properties |    `Object`     |  `Y`  |  `-`   |                                               描述各属性的schema                                               |
+|  required  | `Array<String>` |  `N`  |  `-`   |                                               必须属性名称的数组                                               |
+|   format   |    `String`     |  `N`  |  `-`   | 可以设置成`excel`，表示从excel文件中导入数据，excel文件的内容必须要遵守规范，[详见](#excel导入数据（v0.2.1+）) |
+
 
 ```
 {
@@ -252,3 +254,100 @@
   default: ['浙江省', '杭州市', '余杭区', '奥克斯创智1号']
 }
 ```
+
+## excel导入数据（v0.2.1+）
+
+有时候需要输入的数据量太大，通过表单来一个个输入很麻烦，而且页面性能也很差，所以也支持通过excel文件来导入数据。不过excel导入数据时只支持默认的数据格式。示例如下
+
+表单项schema
+
+```javascript
+{
+  title: 'excel',
+  type: 'object', // 必须设置为object
+  format: 'excel', // 必须设置为excel
+  required: ['person', 'ticket'],
+  properties: {
+    person: {
+      type: 'array', // 必须设置为array
+      minItems: 1,
+      maxItems: 10,
+      items: {
+        type: 'object', // 必须设置为object
+        required: ['name', 'id', 'age', 'birthday'],
+        properties: {
+          name: {
+            type: 'string' // 只能设置为string或number
+          },
+          id: {
+            type: 'string'
+          },
+          age: {
+            type: 'number'
+          },
+          birthday: {
+            type: 'string'
+          }
+        }
+      }
+    },
+    ticket: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string'
+          },
+          start: {
+            type: 'string'
+          },
+          end: {
+            type: 'string'
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+表单项值
+
+```json
+{
+  "person": [
+    {
+      "name": "小明",
+      "id": "432164537243123",
+      "age": 28,
+      "birthday": "1992-02-12"
+    },
+    {
+      "name": "小红",
+      "id": "332164345372431",
+      "age": 29,
+      "birthday": "1991-08-23"
+    }
+  ],
+  "ticket": [
+    {
+      "address": "1号剧院",
+      "start": "2020-6-13 14:00:00",
+      "end": "2020-6-13 16:00:00"
+    },
+    {
+      "address": "2号剧院",
+      "start": "2020-6-12 14:00:00",
+      "end": "2020-6-12 16:00:00"
+    }
+  ]
+}
+```
+
+对应的excel文件如下，**每个单元格的数据类型只能为字符串和数字**
+
+![excel1](image/excel-1.png)
+![excel2](image/excel-2.png)
+
+

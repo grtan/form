@@ -52,7 +52,7 @@
         :actions="actions"
       />
     </div>
-    <el-table :data="list" v-bind="tableConfig" @selection-change="onSelectionChange">
+    <el-table :data="list" v-bind="tableProps" v-on="tableEvents">
       <el-table-column v-if="schema.tableExpand" type="expand" v-bind="schema.tableExpand">
         <component
           :is="schema.tableExpand.slotComponent()"
@@ -71,7 +71,7 @@
       <el-table-column v-if="schema.tableIndex" type="index" v-bind="schema.tableIndex" />
       <template v-for="(propSchema,prop) in schema.properties">
         <el-table-column
-          v-if="propSchema.showInTable===undefined||!!propSchema.showInTable"
+          v-if="propSchema.showInTable===undefined||propSchema.showInTable"
           :key="prop"
           :label="propSchema.title"
           v-bind="propSchema.tableColumn||{}"
@@ -239,13 +239,26 @@ export default {
         return this.schema.properties[prop].showInSearch
       })
     },
-    tableConfig () {
+    tableProps () {
       return {
         ...{
           height: 'auto'
         },
         ...this.schema.table
       }
+    },
+    tableEvents () {
+      const events = {...this.schema.tableEvents}
+
+      events['selection-change'] = (...args) => {
+        this.onSelectionChange(...args)
+
+        if (typeof events['selection-change'] === 'function') {
+          events['selection-change']()
+        }
+      }
+
+      return events
     }
   },
   watch: {

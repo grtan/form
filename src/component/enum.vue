@@ -87,13 +87,14 @@
     <el-dialog class="fm-enum__list" :visible.sync="show" width="70%" append-to-body>
       <v-list :schema="getListSchema(schema.enum)" />
     </el-dialog>
-    <el-table v-if="fixedValue.length" :data="fixedValue" height="auto">
+    <!-- 这里对table使用key，是因为值不同时，高度要自适应 -->
+    <el-table v-if="fixedValue.length" :key="JSON.stringify(fixedValue)" :data="fixedValue" height="auto">
       <template v-for="(propSchema,prop) in schema.enum.properties">
         <el-table-column
           v-if="propSchema.showInTable===undefined||propSchema.showInTable"
           :key="prop"
-          align="center"
           :label="propSchema.title"
+          v-bind="propSchema.tableColumn||{}"
         >
           <component
             :is="propSchema.displayComponent()"

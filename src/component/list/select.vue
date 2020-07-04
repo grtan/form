@@ -1,5 +1,5 @@
 <template>
-  <el-button type="text" @click="onClick">
+  <el-button type="text" @click.stop="onClick">
     选择
   </el-button>
 </template>

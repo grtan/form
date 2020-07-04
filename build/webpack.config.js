@@ -16,7 +16,7 @@ module.exports = {
     libraryTarget: 'umd'
   },
   resolve: {
-    extensions: ['.js', '.vue'],
+    extensions: ['.ts', 'tsx', '.js', 'jsx', '.vue', '.json'],
     alias: {
       '@': path.resolve(__dirname, '../src')
     }
@@ -33,7 +33,14 @@ module.exports = {
       return /\/richtext\/generate-resource\.js$/.test(request)
     },
     rules: [{
-      test: /\.js$/,
+      test: /\.tsx?$/,
+      exclude: /node_modules/,
+      use: [
+        'babel-loader',
+        'ts-loader'
+      ]
+    }, {
+      test: /\.jsx?$/,
       exclude: /node_modules/,
       use: {
         loader: 'babel-loader'

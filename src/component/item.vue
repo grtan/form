@@ -19,7 +19,7 @@
       <!-- 对象 -->
       <template v-if="schema.type==='object'">
         <el-collapse
-          v-if="value"
+          v-if="value&&!isBase"
           :class="{'fm-item--root':isRoot}"
           :value="['1']"
         >
@@ -65,6 +65,25 @@
             />
           </el-collapse-item>
         </el-collapse>
+        <!-- excel -->
+        <div
+          v-if="value&&schema.format==='excel'"
+          :class="['fm-item__content',{'fm-item__content--valid':!error}]"
+        >
+          <v-excel
+            ref="object"
+            :schema="schema"
+            :value="value"
+            @validate="$set(validateResult.properties, ...arguments)"
+            @destroy="$delete(validateResult.properties,$event)"
+          />
+          <div
+            v-if="schema.description"
+            class="fm-item__description--content"
+          >
+            {{ schema.description }}
+          </div>
+        </div>
       </template>
 
       <!-- 数组 -->
@@ -303,6 +322,7 @@
 <script>
 import Big from 'big.js'
 import VObject from './object'
+import VExcel from './excel'
 import VArray from './array'
 import VBase from './base'
 
@@ -372,6 +392,7 @@ function travel (item = {}, valid = true) {
 export default {
   components: {
     VObject,
+    VExcel,
     VArray,
     VBase
   },
@@ -389,7 +410,8 @@ export default {
       required: true
     },
     value: {
-      required: true
+      type: [String, Number, Boolean, Object, Array],
+      default: undefined
     },
     required: { // 是否必填
       type: Boolean,
@@ -425,8 +447,8 @@ export default {
         }
       } : {}
     },
-    isBase () { // 是不是基本数据类型
-      return !['object', 'array'].includes(this.schema.type)
+    isBase () { // 是不是基础展示类型
+      return !['object', 'array'].includes(this.schema.type) || (this.schema.type === 'object' && this.schema.format === 'excel')
     },
     global () { // 全局数据
       return !this.isRoot ? this.fmGlobal : this.provideData.fmGlobal
@@ -588,7 +610,7 @@ export default {
             rules.value.push({
               validator (rule, value, callback) {
                 if (value && value.startsWith('validate:')) {
-                  callback(new Error(value.replace(/^validate\:/, '')))
+                  callback(new Error(value.replace(/^validate:/, '')))
                 } else {
                   callback()
                 }
@@ -674,6 +696,26 @@ export default {
                 }
               })
             }
+          }
+
+          break
+        case type === 'object':
+          if (format === 'excel') {
+            rules.value.push({
+              validator: (rule, value, callback) => {
+                const prop = Object.keys(this.validateResult.properties).find(prop => {
+                  return !this.validateResult.properties[prop].valid
+                })
+
+                if (prop !== undefined) {
+                  const { message } = this.validateResult.properties[prop]
+
+                  return callback(new Error(`工作表${prop}${message}`))
+                }
+
+                callback()
+              }
+            })
           }
 
           break

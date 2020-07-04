@@ -59,9 +59,11 @@ export default {
       type: Function
     },
     labelWidth: {
-      type: Number
+      type: Number,
+      default: 80
     },
     defaultValue: {
+      type: [String, Number, Boolean, Object, Array],
       default: undefined
     }
   },
