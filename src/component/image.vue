@@ -1,5 +1,5 @@
 <template>
-  <div :class="['fm-image__root',{'fm-image--uploaded':schema.readonly||value}]">
+  <div v-if="value||!schema.readonly" :class="['fm-image__root',{'fm-image--uploaded':schema.readonly||value}]">
     <el-upload
       ref="upload"
       :action="schema.action||''"
@@ -12,25 +12,25 @@
       :before-upload="onBeforeUpload"
       :on-success="onSuccess"
     >
-      <i v-if="!schema.readonly&&!value" class="el-icon-plus"></i>
-      <div v-else class="fm-image__box" ref="box">
-        <img v-if="schema.format==='image'" :src="value" />
+      <i v-if="!schema.readonly&&!value" class="el-icon-plus" />
+      <div v-else ref="box" class="fm-image__box">
+        <img v-if="schema.format==='image'" :src="value">
         <video v-else :src="value">您的浏览器不支持 video 标签</video>
         <el-row type="flex" justify="center" @click.native.stop>
           <el-col :span="6">
-            <i class="el-icon-zoom-in" @click="onPreview"></i>
+            <i class="el-icon-zoom-in" @click="onPreview" />
           </el-col>
-          <el-col :span="6" v-if="!schema.readonly">
-            <i class="el-icon-edit" @click="onEdit"></i>
+          <el-col v-if="!schema.readonly" :span="6">
+            <i class="el-icon-edit" @click="onEdit" />
           </el-col>
-          <el-col :span="6" v-if="!schema.readonly">
-            <i class="el-icon-delete" @click="onDelete"></i>
+          <el-col v-if="!schema.readonly" :span="6">
+            <i class="el-icon-delete" @click="onDelete" />
           </el-col>
         </el-row>
       </div>
     </el-upload>
-    <el-dialog class="fm-image__preview" :visible.sync="preview">
-      <img v-if="schema.format==='image'" width="100%" :src="value" />
+    <el-dialog class="fm-image__preview" :visible.sync="preview" append-to-body>
+      <img v-if="schema.format==='image'" width="100%" :src="value">
       <video v-else :src="value" controls>您的浏览器不支持 video 标签</video>
     </el-dialog>
   </div>
@@ -109,19 +109,20 @@ export default {
       required: true
     },
     value: {
-      type: String
+      type: String,
+      default: undefined
     }
   },
-  data() {
+  data () {
     return {
       preview: false // 是否显示预览界面
     }
   },
   methods: {
-    onValidateFail(reason) {
+    onValidateFail (reason) {
       reason && this.$emit('input', `validate:${reason}`)
     },
-    onBeforeUpload(file) {
+    onBeforeUpload (file) {
       if (typeof this.schema.fileValidator !== 'function') {
         return
       }
@@ -129,11 +130,12 @@ export default {
       // 检验失败后不会上传文件
       return this.schema.fileValidator(file, this.onValidateFail)
     },
-    onSuccess(res, file) {
+    onSuccess (res, file) {
       let url
 
       if (typeof this.schema.urlFetcher === 'string') {
         const response = file.response
+        // eslint-disable-next-line no-new-func
         const fn = new Function('response', `return (${this.schema.urlFetcher})`)
 
         url = fn(response)
@@ -144,13 +146,13 @@ export default {
       this.$refs.upload.clearFiles()
       this.$emit('input', url)
     },
-    onPreview() {
+    onPreview () {
       this.preview = true
     },
-    onEdit() {
+    onEdit () {
       this.$refs.box.click()
     },
-    onDelete() {
+    onDelete () {
       this.$emit('input', undefined)
     }
   }

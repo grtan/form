@@ -3,8 +3,10 @@
     <el-button icon="el-icon-plus" @click="show=true">
       新增
     </el-button>
-    <el-dialog :visible.sync="show" width="70%" append-to-body>
+    <el-dialog :visible.sync="show" width="75%" append-to-body>
       <v-form
+        v-if="formKey"
+        :key="formKey"
         :schema="addSchema"
         :submit="submit"
       />
@@ -46,7 +48,8 @@ export default {
   },
   data () {
     return {
-      show: false
+      show: false,
+      formKey: 0
     }
   },
   computed: {
@@ -66,6 +69,16 @@ export default {
       })
 
       return addSchema
+    }
+  },
+  watch: {
+    show () {
+      if (!this.show) {
+        return
+      }
+
+      // 显示时创建新实例
+      this.formKey++
     }
   },
   methods: {

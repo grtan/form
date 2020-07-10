@@ -8,32 +8,29 @@
             :key="prop"
             class="fm-list__search-item"
           >
-            {{ schema.properties[prop].title }}
+            {{ fixedSchema.properties[prop].title }}
             <v-base
               v-model="search[prop]"
-              :schema="schema.properties[prop]"
+              :schema="fixedSchema.properties[prop]"
             />
           </div>
-          <el-button icon="el-icon-search" @click="query">
-            查询
-          </el-button>
-          <el-button @click="setSearch(),query()">
+          <el-button @click="setSearch()">
             重置
           </el-button>
         </template>
       </div>
       <div class="fm-list__operations">
         <v-add
-          v-if="schema.add"
-          :schema="schema"
+          v-if="fixedSchema.add"
+          :schema="fixedSchema"
           :list="list"
           :search="search"
           :selection="selection"
           :actions="actions"
         />
         <v-multi-delete
-          v-if="schema.multiDelete"
-          :schema="schema"
+          v-if="fixedSchema.multiDelete"
+          :schema="fixedSchema"
           :list="list"
           :search="search"
           :selection="selection"
@@ -41,24 +38,24 @@
         />
       </div>
     </div>
-    <div v-if="typeof schema.globalOperations==='function'" class="fm-list__global-operations">
+    <div v-if="typeof fixedSchema.globalOperations==='function'" class="fm-list__global-operations">
       <component
         :is="component"
-        v-for="(component,index) in schema.globalOperations()"
+        v-for="(component,index) in fixedSchema.globalOperations()"
         :key="index"
-        :schema="schema"
+        :schema="fixedSchema"
         :list="list"
         :selection="selection"
         :actions="actions"
       />
     </div>
     <el-table :data="list" v-bind="tableProps" v-on="tableEvents">
-      <el-table-column v-if="schema.tableExpand" type="expand" v-bind="schema.tableExpand">
+      <el-table-column v-if="fixedSchema.tableExpand" type="expand" v-bind="fixedSchema.tableExpand">
         <component
-          :is="schema.tableExpand.slotComponent()"
+          :is="fixedSchema.tableExpand.slotComponent()"
           slot-scope="scope"
           :slotscope="scope"
-          :schema="schema"
+          :schema="fixedSchema"
           :list="list"
           :index="scope.$index"
           :row="scope.row"
@@ -67,9 +64,9 @@
           :actions="actions"
         />
       </el-table-column>
-      <el-table-column v-if="schema.tableSelection" type="selection" v-bind="schema.tableSelection" />
-      <el-table-column v-if="schema.tableIndex" type="index" v-bind="schema.tableIndex" />
-      <template v-for="(propSchema,prop) in schema.properties">
+      <el-table-column v-if="fixedSchema.tableSelection" type="selection" v-bind="fixedSchema.tableSelection" />
+      <el-table-column v-if="fixedSchema.tableIndex" type="index" v-bind="fixedSchema.tableIndex" />
+      <template v-for="(propSchema,prop) in fixedSchema.properties">
         <el-table-column
           v-if="propSchema.showInTable===undefined||propSchema.showInTable"
           :key="prop"
@@ -87,15 +84,15 @@
         </el-table-column>
       </template>
       <el-table-column
-        v-if="schema.edit||schema.delete||typeof schema.rowOperations==='function'"
+        v-if="fixedSchema.edit||fixedSchema.delete||typeof fixedSchema.rowOperations==='function'"
         align="center"
         label="操作"
         fixed="right"
       >
         <template slot-scope="scope">
           <v-edit
-            v-if="schema.edit&&(scope.row.showEdit===undefined||!!scope.row.showEdit)"
-            :schema="schema"
+            v-if="fixedSchema.edit&&(scope.row.showEdit===undefined||!!scope.row.showEdit)"
+            :schema="fixedSchema"
             :list="list"
             :index="scope.$index"
             :row="scope.row"
@@ -104,8 +101,8 @@
             :actions="actions"
           />
           <v-delete
-            v-if="schema.delete&&(scope.row.showDelete===undefined||!!scope.row.showDelete)"
-            :schema="schema"
+            v-if="fixedSchema.delete&&(scope.row.showDelete===undefined||!!scope.row.showDelete)"
+            :schema="fixedSchema"
             :list="list"
             :index="scope.$index"
             :row="scope.row"
@@ -113,12 +110,12 @@
             :selection="selection"
             :actions="actions"
           />
-          <template v-if="typeof schema.rowOperations==='function'">
+          <template v-if="typeof fixedSchema.rowOperations==='function'">
             <component
               :is="component"
-              v-for="(component,index) in schema.rowOperations()"
+              v-for="(component,index) in fixedSchema.rowOperations()"
               :key="index"
-              :schema="schema"
+              :schema="fixedSchema"
               :list="list"
               :index="scope.$index"
               :row="scope.row"
@@ -131,7 +128,7 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      v-if="schema.pagination&&total"
+      v-if="fixedSchema.pagination&&total"
       :current-page.sync="search.page"
       :total="total"
       :page-size="pageSize"
@@ -196,6 +193,7 @@
 
 <script>
 import axios from 'axios'
+import { debounce, cloneDeepWith } from 'lodash-es'
 import VBase from '../base'
 import VDisplay from './display'
 import VAdd from './add'
@@ -225,8 +223,8 @@ export default {
       list: [],
       total: 0,
       pageSize: 15,
-      search: {},
-      selection: [],
+      search: {}, // 查询条件
+      selection: [], // 选中的行数据
       actions: {
         setSearch: this.setSearch,
         query: this.query
@@ -234,9 +232,17 @@ export default {
     }
   },
   computed: {
+    fixedSchema () {
+      return cloneDeepWith(this.schema, (value) => {
+        // 绑定所有方法的this为组件实例
+        if (typeof value === 'function') {
+          return value.bind(this)
+        }
+      })
+    },
     searchProps () {
-      return Object.keys(this.schema.properties).filter(prop => {
-        return this.schema.properties[prop].showInSearch
+      return Object.keys(this.fixedSchema.properties).filter(prop => {
+        return this.fixedSchema.properties[prop].showInSearch
       })
     },
     tableProps () {
@@ -244,11 +250,11 @@ export default {
         ...{
           height: 'auto'
         },
-        ...this.schema.table
+        ...this.fixedSchema.table
       }
     },
     tableEvents () {
-      const events = {...this.schema.tableEvents}
+      const events = { ...this.fixedSchema.tableEvents }
 
       events['selection-change'] = (...args) => {
         this.onSelectionChange(...args)
@@ -262,11 +268,13 @@ export default {
     }
   },
   watch: {
-    'search.page': 'query'
+    search: {
+      deep: true,
+      handler: 'query'
+    }
   },
   created () {
     this.setSearch()
-    this.query()
   },
   methods: {
     setSearch (search) {
@@ -279,15 +287,13 @@ export default {
       }
 
       // 重置搜索条件
-      search = this.schema.pagination ? { page: 1 } : {}
+      search = this.fixedSchema.pagination ? { page: 1 } : {}
       this.searchProps.forEach(prop => {
-        if (this.schema.properties[prop].default !== undefined) {
-          search[prop] = this.schema.properties[prop].default
-        }
+        search[prop] = this.fixedSchema.properties[prop].default
       })
       this.search = search
     },
-    async query () {
+    query: debounce(async function () {
       const params = {}
 
       Object.keys(this.search).forEach(prop => {
@@ -296,16 +302,16 @@ export default {
         }
       })
 
-      this.schema.query(params, axios, ({ total, page, pageSize, list }) => {
+      this.fixedSchema.query(params, axios, ({ total, page, pageSize, list }) => {
         this.list = list
 
-        if (this.schema.pagination) {
+        if (this.fixedSchema.pagination) {
           this.total = total
           this.search.page = page
           this.pageSize = pageSize
         }
       })
-    },
+    }, 400),
     onSelectionChange (selection) {
       this.selection = selection
     }

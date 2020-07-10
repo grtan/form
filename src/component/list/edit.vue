@@ -3,8 +3,10 @@
     <el-button type="text" @click.stop="show=true">
       编辑
     </el-button>
-    <el-dialog :visible.sync="show" append-to-body>
+    <el-dialog :visible.sync="show" width="75%" append-to-body>
       <v-form
+        v-if="showForm"
+        :key="formKey"
         :schema="editSchema"
         :default-value="row"
         :submit="submit"
@@ -63,7 +65,9 @@ export default {
   },
   data () {
     return {
-      show: false
+      show: false,
+      showForm: false,
+      formKey: 0
     }
   },
   computed: {
@@ -88,6 +92,22 @@ export default {
       })
 
       return editSchema
+    }
+  },
+  watch: {
+    show () {
+      if (this.show) {
+        clearTimeout(this.timeoutId)
+        this.showForm = true
+        // 没来得及销毁时确保重新创建实例
+        this.formKey++
+        return
+      }
+
+      // 编辑框关闭时就销毁form表单，防止存在许多没用到的实例，消耗内存、性能
+      this.timeoutId = setTimeout(() => {
+        this.showForm = false
+      }, 500)
     }
   },
   methods: {

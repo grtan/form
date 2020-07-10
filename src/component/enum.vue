@@ -1,7 +1,7 @@
 <template>
   <!-- select -->
   <el-select
-    v-if="schema.enum instanceof Array&&isSelect"
+    v-if="!isFetch&&isSelect"
     class="fm-enum__root"
     :value="fixedValue"
     :disabled="schema.readonly"
@@ -23,7 +23,7 @@
   </el-select>
   <!-- radio -->
   <el-radio-group
-    v-else-if="schema.enum instanceof Array"
+    v-else-if="!isFetch"
     class="fm-enum__root"
     :value="fixedValue"
     :disabled="schema.readonly"
@@ -80,30 +80,36 @@
     </el-radio>
   </el-radio-group>
   <!-- 通过接口查询 -->
-  <div v-else class="fm-enum__root">
+  <div v-else class="fm-enum__root fm-enum--fetch">
     <el-button type="text" @click="show=true">
       选择
     </el-button>
-    <el-dialog class="fm-enum__list" :visible.sync="show" width="70%" append-to-body>
+    <el-dialog class="fm-enum__list" :visible.sync="show" width="75%" append-to-body>
       <v-list :schema="getListSchema(schema.enum)" />
     </el-dialog>
+    <v-base
+      v-if="properties.length===1"
+      :schema="{...schema.enum.properties[properties[0]],readonly:true}"
+      :value="list[0]&&list[0][properties[0]]"
+      @input="()=>{}"
+    />
     <!-- 这里对table使用key，是因为值不同时，高度要自适应 -->
-    <el-table v-if="fixedValue.length" :key="JSON.stringify(fixedValue)" :data="fixedValue" height="auto">
-      <template v-for="(propSchema,prop) in schema.enum.properties">
+    <el-table v-else-if="list.length" :key="JSON.stringify(list)" :data="list" height="auto">
+      <template v-for="prop in properties">
         <el-table-column
-          v-if="propSchema.showInTable===undefined||propSchema.showInTable"
+          v-if="schema.enum.properties[prop].showInTable===undefined||schema.enum.properties[prop].showInTable"
           :key="prop"
-          :label="propSchema.title"
-          v-bind="propSchema.tableColumn||{}"
+          :label="schema.enum.properties[prop].title"
+          v-bind="schema.enum.properties[prop].tableColumn||{}"
         >
           <component
-            :is="propSchema.displayComponent()"
-            v-if="typeof propSchema.displayComponent==='function'"
+            :is="schema.enum.properties[prop].displayComponent()"
+            v-if="typeof schema.enum.properties[prop].displayComponent==='function'"
             slot-scope="scope"
-            :schema="propSchema"
+            :schema="schema.enum.properties[prop]"
             :value="scope.row[prop]"
           />
-          <v-display v-else slot-scope="scope" :schema="propSchema" :value="scope.row[prop]" />
+          <v-display v-else slot-scope="scope" :schema="schema.enum.properties[prop]" :value="scope.row[prop]" />
         </el-table-column>
       </template>
     </el-table>
@@ -113,6 +119,25 @@
 <style lang="less">
 .fm-enum {
   &__root {
+    &.fm-enum--fetch {
+      display: flex;
+      align-items: flex-start;
+
+      > .el-button {
+        flex: none;
+        margin-right: 1em;
+      }
+
+      > .fm-base__root {
+        flex: auto;
+      }
+
+      > .el-table {
+        flex: auto;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      }
+    }
+
     .el-radio {
       margin-top: 5px;
       margin-bottom: 5px;
@@ -122,11 +147,6 @@
         display: inline-block;
         vertical-align: middle;
       }
-    }
-
-    > .el-table {
-      margin-top: 10px;
-      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -161,6 +181,8 @@
 </style>
 
 <script>
+import axios from 'axios'
+import VBase from './base'
 import VImage from './image'
 import VList from './list/index'
 import VSelect from './list/select'
@@ -168,6 +190,9 @@ import VDisplay from './list/display'
 
 export default {
   components: {
+    VBase (resolve) {
+      resolve(VBase)
+    },
     VImage,
     VDisplay,
     VList (resolve) {
@@ -185,24 +210,44 @@ export default {
     }
   },
   data () {
-    // 从接口获取数据时的主属性
-    const primary = this.schema.enum instanceof Array ? '' : Object.keys(this.schema.enum.properties).find(prop => {
-      return this.schema.enum.properties[prop].primary
-    })
-
-    if (primary === undefined) {
-      throw new Error('当schema.enum为对象时，properties中必须要存在唯一的primary属性')
-    }
-
     return {
       show: false,
-      primary,
-      list: (this.schema.enum instanceof Array || this.value === undefined) ? [] : [{
-        [primary]: this.value
-      }]
+      list: []
     }
   },
   computed: {
+    isFetch () {
+      // 从接口获取数据
+      return !(this.schema.enum instanceof Array)
+    },
+    // 主属性
+    primary () {
+      if (!this.isFetch) {
+        return
+      }
+
+      const primary = Object.keys(this.schema.enum.properties).find(prop => {
+        return this.schema.enum.properties[prop].primary
+      })
+
+      if (primary === undefined) {
+        throw new Error('当schema.enum为对象时，properties中必须要存在唯一的primary属性')
+      }
+
+      return primary
+    },
+    // 从列表中选择数据后在form表单项中显示的属性列表
+    properties () {
+      if (!this.isFetch) {
+        return []
+      }
+
+      return Object.keys(this.schema.enum.properties).filter((prop) => {
+        const { primary, showInFormItem } = this.schema.enum.properties[prop]
+
+        return (primary && showInFormItem === undefined) || showInFormItem
+      })
+    },
     isSelect () {
       if (this.schema.component === 'select') {
         if (this.schema.type === 'string') {
@@ -218,9 +263,8 @@ export default {
       return !['address', 'range'].includes(this.schema.type)
     },
     fixedValue () {
-      // 从接口获取数据
-      if (!(this.schema.enum instanceof Array)) {
-        return this.list
+      if (this.isFetch) {
+        return
       }
 
       if (!this.isBase) {
@@ -230,6 +274,31 @@ export default {
       }
 
       return this.value
+    }
+  },
+  watch: {
+    value: {
+      immediate: true,
+      handler () {
+        if (!this.isFetch) {
+          return
+        }
+
+        if (this.value === undefined) {
+          this.list = []
+          return
+        }
+
+        if (this.list.length) {
+          return
+        }
+
+        this.schema.enum.query({
+          [this.primary]: this.value
+        }, axios, ({ list }) => {
+          this.list = [list[0]]
+        })
+      }
     }
   },
   methods: {

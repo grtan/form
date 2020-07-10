@@ -174,6 +174,54 @@ const code = (function () {
           type: 'address',
           className: 'my-address'
         },
+        key66: {
+          title: 'excel',
+          type: 'object',
+          format: 'excel',
+          required: ['person', 'ticket'],
+          properties: {
+            person: {
+              type: 'array',
+              minItems: 3,
+              maxItems: 10,
+              items: {
+                type: 'object',
+                required: ['name', 'id', 'age', 'birthday'],
+                properties: {
+                  name: {
+                    type: 'string'
+                  },
+                  id: {
+                    type: 'string'
+                  },
+                  age: {
+                    type: 'number'
+                  },
+                  birthday: {
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            ticket: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  address: {
+                    type: 'string'
+                  },
+                  start: {
+                    type: 'string'
+                  },
+                  end: {
+                    type: 'string'
+                  }
+                }
+              }
+            }
+          }
+        },
         key4: {
           title: '数组',
           description: '2-4项',

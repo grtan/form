@@ -133,6 +133,7 @@
         :max="typeof schema.maximum==='number'?schema.maximum:undefined"
         :step="typeof schema.multipleOf==='number'?schema.multipleOf:undefined"
         :step-strictly="typeof schema.multipleOf==='number'"
+        :disabled="schema.readonly"
         @input="$listeners.input"
       />
     </template>
@@ -201,7 +202,9 @@ import VRichtext from './richtext/index'
 
 export default {
   components: {
-    VEnum,
+    VEnum (resolve) {
+      resolve(VEnum)
+    },
     VImage,
     VFile,
     VAddress,
@@ -214,7 +217,8 @@ export default {
       required: true
     },
     value: {
-      required: true
+      type: [String, Number, Boolean, Array],
+      default: undefined
     }
   }
 }
