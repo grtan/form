@@ -1,100 +1,157 @@
 <template>
-  <!-- select -->
+  <!-- select多选、单选 -->
   <el-select
-    v-if="!isFetch&&isSelect"
+    v-if="!isFetch&&schema.component==='select'"
     class="fm-enum__root"
-    :value="fixedValue"
+    :multiple="isMultiple"
+    :multiple-limit="schema.maxItems"
     :disabled="schema.readonly"
     placeholder="请选择"
-    @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
+    :value="fixedValue"
+    @input="onInput"
   >
     <el-option
-      v-for="({value:enumValue,name,showTip},index) in schema.enum"
+      v-for="({label,value:itemValue},index) in options"
       :key="index"
-      :label="getSelectLabel(index)"
-      :value="isBase?enumValue:index"
-      :style="schema.type==='string'&&schema.format==='color'?{background:enumValue}:{}"
-    >
-      <div v-if="name&&showTip" class="fm-enum__select-item">
-        <span class="fm-enum__select-item--left">{{ name }}</span>
-        <span class="fm-enum__select-item--right">{{ getShowValue(enumValue) }}</span>
-      </div>
-    </el-option>
+      :label="label"
+      :value="itemValue"
+    />
   </el-select>
-  <!-- radio -->
-  <el-radio-group
-    v-else-if="!isFetch"
+  <!-- checkbox多选 -->
+  <el-checkbox-group
+    v-else-if="!isFetch&&isMultiple"
     class="fm-enum__root"
-    :value="fixedValue"
     :disabled="schema.readonly"
-    @input="$listeners.input(isBase?$event:schema.enum[$event].value)"
+    :min="schema.minItems"
+    :max="schema.maxItems"
+    :value="fixedValue"
+    @input="onInput"
   >
-    <el-radio
-      v-for="({value:enumValue,name,showTip,download},index) in schema.enum"
+    <el-checkbox
+      v-for="({name,label,value:itemValue},index) in options"
       :key="index"
-      :label="isBase?enumValue:index"
+      :label="itemValue"
     >
       <!-- color -->
       <el-tooltip
-        v-if="schema.type==='string'&&schema.format==='color'"
-        :content="enumValue"
-        :disabled="!showTip"
+        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="String(itemValue)"
+        :disabled="!name"
         placement="bottom"
       >
-        <span v-if="name" :style="{color:enumValue}">{{ name }}</span>
-        <span v-else class="fm-enum__color" :style="{background:enumValue}" />
+        <span :style="{color:itemValue}">{{ label }}</span>
       </el-tooltip>
 
       <!-- image、video -->
       <el-tooltip
-        v-else-if="schema.type==='string'&&['image','video'].includes(schema.format)"
-        :content="name||enumValue"
-        :disabled="!showTip"
+        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['image','video'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="label"
         placement="bottom"
       >
-        <v-image :schema="Object.assign({},schema,{readonly:true})" :value="enumValue" />
+        <v-image :schema="{...(isMultiple?schema.items:schema),readonly:true}" :value="itemValue" />
       </el-tooltip>
 
       <!-- file -->
       <el-tooltip
-        v-else-if="schema.type==='string'&&['file'].includes(schema.format)"
-        :content="enumValue"
-        :disabled="!name||!showTip"
+        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="String(itemValue)"
+        :disabled="!name"
         placement="bottom"
       >
-        <el-link v-if="download" :href="enumValue" target="_blank">
-          {{ name||enumValue }}
+        <el-link
+          :href="itemValue"
+          target="_blank"
+        >
+          {{ label }}
         </el-link>
-        <span v-else>{{ name||enumValue }}</span>
       </el-tooltip>
 
       <!-- 其他 -->
       <el-tooltip
         v-else
-        :content="getShowValue(enumValue)"
-        :disabled="!name||!showTip"
+        :content="isBaseData?String(itemValue):JSON.stringify(schema.enum[index].value)"
+        :disabled="!name"
         placement="bottom"
       >
-        <span>{{ name||getShowValue(enumValue) }}</span>
+        <span>{{ label }}</span>
+      </el-tooltip>
+    </el-checkbox>
+  </el-checkbox-group>
+  <!-- radio单选 -->
+  <el-radio-group
+    v-else-if="!isFetch"
+    class="fm-enum__root"
+    :disabled="schema.readonly"
+    :value="fixedValue"
+    @input="onInput"
+  >
+    <el-radio
+      v-for="({name,label,value:itemValue},index) in options"
+      :key="index"
+      :label="itemValue"
+    >
+      <!-- color -->
+      <el-tooltip
+        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="String(itemValue)"
+        :disabled="!name"
+        placement="bottom"
+      >
+        <span :style="{color:itemValue}">{{ label }}</span>
+      </el-tooltip>
+
+      <!-- image、video -->
+      <el-tooltip
+        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['image','video'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="label"
+        placement="bottom"
+      >
+        <v-image :schema="{...(isMultiple?schema.items:schema),readonly:true}" :value="itemValue" />
+      </el-tooltip>
+
+      <!-- file -->
+      <el-tooltip
+        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        :content="String(itemValue)"
+        :disabled="!name"
+        placement="bottom"
+      >
+        <el-link
+          :href="itemValue"
+          target="_blank"
+        >
+          {{ label }}
+        </el-link>
+      </el-tooltip>
+
+      <!-- 其他 -->
+      <el-tooltip
+        v-else
+        :content="isBaseData?String(itemValue):JSON.stringify(schema.enum[index].value)"
+        :disabled="!name"
+        placement="bottom"
+      >
+        <span>{{ label }}</span>
       </el-tooltip>
     </el-radio>
   </el-radio-group>
   <!-- 通过接口查询 -->
   <div v-else class="fm-enum__root fm-enum--fetch">
-    <el-button type="text" @click="show=true">
-      选择
-    </el-button>
-    <el-dialog class="fm-enum__list" :visible.sync="show" width="75%" append-to-body>
-      <v-list :schema="getListSchema(schema.enum)" />
-    </el-dialog>
-    <v-base
-      v-if="properties.length===1"
-      :schema="{...schema.enum.properties[properties[0]],readonly:true}"
-      :value="list[0]&&list[0][properties[0]]"
-      @input="()=>{}"
-    />
+    <div v-if="properties.length===1&&list.length" class="fm-enum__list">
+      <div v-for="(item,index) in list" :key="index" class="fm-enum__item">
+        <component
+          :is="typeof schema.enum.properties[properties[0]].component==='function'?schema.enum.properties[properties[0]].component():'v-base'"
+          :schema="{...schema.enum.properties[properties[0]],readonly:true}"
+          :value="list[index][properties[0]]"
+          @input="()=>{}"
+        />
+        <el-button type="text" @click="onDelete(index)">
+          删除
+        </el-button>
+      </div>
+    </div>
     <!-- 这里对table使用key，是因为值不同时，高度要自适应 -->
-    <el-table v-else-if="list.length" :key="JSON.stringify(list)" :data="list" height="auto">
+    <el-table v-else-if="properties.length>1&&list.length" :key="JSON.stringify(list)" class="fm-enum__list" :data="list" height="auto">
       <template v-for="prop in properties">
         <el-table-column
           v-if="schema.enum.properties[prop].showInTable===undefined||schema.enum.properties[prop].showInTable"
@@ -112,7 +169,22 @@
           <v-display v-else slot-scope="scope" :schema="schema.enum.properties[prop]" :value="scope.row[prop]" />
         </el-table-column>
       </template>
+      <el-table-column
+        align="center"
+        label="操作"
+        fixed="right"
+      >
+        <el-button slot-scope="scope" type="text" @click="onDelete(scope.$index)">
+          删除
+        </el-button>
+      </el-table-column>
     </el-table>
+    <el-button type="primary" plain @click="show=true">
+      选择
+    </el-button>
+    <el-dialog class="fm-enum__dialog" :visible.sync="show" width="75%" append-to-body>
+      <v-list :schema="getListSchema(schema.enum)" />
+    </el-dialog>
   </div>
 </template>
 
@@ -125,16 +197,6 @@
 
       > .el-button {
         flex: none;
-        margin-right: 1em;
-      }
-
-      > .fm-base__root {
-        flex: auto;
-      }
-
-      > .el-table {
-        flex: auto;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
       }
     }
 
@@ -150,24 +212,29 @@
     }
   }
 
-  &__select-item {
-    display: flex;
-    justify-content: space-between;
+  &__list {
+    flex: auto;
+    margin-right: 2em;
 
-    &--right {
-      margin-left: 2em;
-      color: rgb(132, 146, 166);
+    &.el-table {
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     }
   }
 
-  &__color {
-    display: inline-block;
-    vertical-align: middle;
-    width: 20px;
-    height: 20px;
+  &__item {
+    display: flex;
+    align-items: center;
+
+    &:not(:first-child) {
+      margin-top: 0.7em;
+    }
+
+    > .el-button:last-child {
+      margin-left: 1em;
+    }
   }
 
-  &__list {
+  &__dialog {
     > .el-dialog {
       > .el-dialog__body {
         > .fm-list__root {
@@ -181,7 +248,7 @@
 </style>
 
 <script>
-import axios from 'axios'
+import axios from '../util/axios'
 import VBase from './base'
 import VImage from './image'
 import VList from './list/index'
@@ -205,7 +272,7 @@ export default {
       required: true
     },
     value: {
-      type: [String, Number, Boolean, Array],
+      type: [String, Number, Boolean, Object, Array],
       default: undefined
     }
   },
@@ -216,9 +283,30 @@ export default {
     }
   },
   computed: {
+    // 是否多选
+    isMultiple () {
+      return this.schema.type === 'array'
+    },
+    // 是否为基础数据类型
+    isBaseData () {
+      return ['string', 'number', 'boolean'].includes(this.isMultiple ? this.schema.items.type : this.schema.type)
+    },
+    // 是否从接口获取数据，为true时只支持string,number,boolean基础数据类型，为false时支持所有数据类型
     isFetch () {
-      // 从接口获取数据
       return !(this.schema.enum instanceof Array)
+    },
+    options () {
+      const options = []
+
+      this.schema.enum.forEach(({ name, value }, index) => {
+        options.push({
+          name,
+          label: name || (this.isBaseData ? value : JSON.stringify(value)),
+          value: this.isBaseData ? value : index
+        })
+      })
+
+      return options
     },
     // 主属性
     primary () {
@@ -248,29 +336,22 @@ export default {
         return (primary && showInFormItem === undefined) || showInFormItem
       })
     },
-    isSelect () {
-      if (this.schema.component === 'select') {
-        if (this.schema.type === 'string') {
-          return !['image', 'video', 'file'].includes(this.schema.format)
-        }
-
-        return ['number', 'address', 'range'].includes(this.schema.type)
-      }
-
-      return false
-    },
-    isBase () {
-      return !['address', 'range'].includes(this.schema.type)
-    },
     fixedValue () {
       if (this.isFetch) {
         return
       }
 
-      if (!this.isBase) {
-        const index = this.findIndex(this.schema.enum, this.value)
+      if (!this.isBaseData) {
+        const indexs = []
+        const values = this.isMultiple ? this.value : [this.value]
 
-        return index !== -1 ? index : undefined
+        values.forEach((value) => {
+          const index = this.findIndex(this.schema.enum, value)
+
+          indexs.push(index !== -1 ? index : undefined)
+        })
+
+        return this.isMultiple ? indexs : indexs[0]
       }
 
       return this.value
@@ -279,58 +360,65 @@ export default {
   watch: {
     value: {
       immediate: true,
+      deep: true,
       handler () {
         if (!this.isFetch) {
           return
         }
 
-        if (this.value === undefined) {
+        // 值为空
+        if ((this.isMultiple && !this.value.length) || (!this.isMultiple && this.value === undefined)) {
           this.list = []
           return
         }
 
-        if (this.list.length) {
+        const list = (this.isMultiple ? this.value : [this.value]).map(id => {
+          return this.list.find(item => {
+            return item[this.primary] === id
+          })
+        })
+
+        // 如果this.list中已经包含了所有数据
+        if (!list.includes(undefined)) {
+          this.list = list
           return
         }
 
+        // 重新请求数据
         this.schema.enum.query({
-          [this.primary]: this.value
+          [this.primary]: this.isMultiple ? [...this.value] : this.value
         }, axios, ({ list }) => {
-          this.list = [list[0]]
+          this.list = list.slice(0, this.isMultiple ? this.value.length : 1)
         })
       }
     }
   },
   methods: {
-    findIndex (list, array) {
+    findIndex (list, data) {
       return list.findIndex(function ({ value }) {
-        return JSON.stringify(value) === JSON.stringify(array)
+        return JSON.stringify(value) === JSON.stringify(data)
       })
-    },
-    getSelectLabel (index) {
-      return this.schema.enum[index].name || this.getShowValue(this.schema.enum[index].value)
-    },
-    getShowValue (value) {
-      switch (true) {
-        case this.schema.type === 'address':
-          return value.join(' ')
-        case this.schema.type === 'range':
-          return value.join(' ～ ')
-        default:
-          return value
-      }
     },
     // 获取list组件schema
     getListSchema (schema) {
       const self = this
-      const operations = typeof schema.rowOperations === 'function' ? schema.rowOperations() : []
       const Select = {
         ...VSelect,
         methods: {
           onClick () {
             self.show = false
-            self.list = [this.row]
-            self.$listeners.input(this.row[self.primary])
+
+            if (!self.isMultiple) {
+              self.$emit('input', this.row[self.primary])
+              return
+            }
+
+            // 已经选择过
+            if (self.value.includes(this.row[self.primary])) {
+              return
+            }
+
+            self.value.push(this.row[self.primary])
           }
         }
       }
@@ -338,12 +426,61 @@ export default {
       return {
         ...schema,
         rowOperations () {
-          return [
-            ...operations,
-            Select
-          ]
+          const components = [Select]
+
+          if (typeof schema.rowOperations === 'function') {
+            components.unshift(...schema.rowOperations.call(this))
+          }
+
+          return components
         }
       }
+    },
+    // isFetch为false时调用
+    onInput (value) {
+      let values
+
+      if (this.isBaseData) {
+        values = this.isMultiple ? value : [value]
+      } else {
+        values = (this.isMultiple ? value : [value]).map(index => {
+          return this.schema.enum[index].value
+        })
+      }
+
+      if (!this.isMultiple) {
+        // 如果是对象
+        if (this.schema.type === 'object') {
+          Object.keys(this.schema.properties).forEach(prop => {
+            this.$set(this.value, prop, values[0][prop])
+          })
+          return
+        }
+
+        return this.$emit('input', values[0])
+      }
+
+      // 多选时按照UI显示来排序
+      this.value.splice(0, this.value.length, ...values.map(item => {
+        return {
+          index: this.schema.enum.findIndex(({ value }) => {
+            return JSON.stringify(value) === JSON.stringify(item)
+          }),
+          value: item
+        }
+      }).sort((a, b) => {
+        return a.index - b.index
+      }).map(({ value }) => {
+        return value
+      }))
+    },
+    // isFetch为true时调用
+    onDelete (index) {
+      if (!this.isMultiple) {
+        return this.$emit('input', undefined)
+      }
+
+      this.value.splice(index, 1)
     }
   }
 }

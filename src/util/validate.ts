@@ -370,3 +370,78 @@ export function validateValue (schema: Schema, value: any) {
 
   return result
 }
+
+/**
+ * 遍历校验结果并过滤掉一些无用数据
+ * result 表示整个表单是否校验通过
+ */
+export interface IValidation {
+  valid: boolean
+  message: string
+  properties?: Record<string, IValidation>
+  items?: IValidation[]
+}
+
+export function checkValidation (itemResult: IValidation = {} as any, result = {
+  valid: true,
+  message: ''
+}) {
+  const completeResult: IValidation = {} as any
+
+  Object.keys(itemResult).forEach(function (key) {
+    const properties: Exclude<IValidation['properties'], undefined> = {}
+    const items: Exclude<IValidation['items'], undefined> = []
+
+    switch (key) {
+      case 'valid':
+      case 'message':
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        (completeResult[key] as string | boolean) = itemResult[key]
+
+        if (key === 'valid' && !itemResult[key] && result.valid) {
+          result = {
+            valid: false,
+            message: itemResult.message
+          }
+        }
+
+        break
+      case 'properties':
+        Object.keys(itemResult[key]!).forEach(function (prop) {
+          const [child, rs] = checkValidation(itemResult[key]![prop], result)
+
+          if (child) {
+            properties[prop] = child
+          }
+
+          if (!rs.valid && result.valid) {
+            result = rs
+          }
+        })
+
+        if (Object.keys(properties).length) {
+          completeResult[key] = properties
+        }
+        break
+      case 'items':
+        itemResult[key]!.forEach(function (item) {
+          const [child, rs] = checkValidation(item, result)
+
+          items.push(child!)
+
+          if (!rs.valid && result.valid) {
+            result = rs
+          }
+        })
+
+        if (items.some(function (child) {
+          return child
+        })) {
+          completeResult[key] = items
+        }
+        break
+    }
+  })
+
+  return [Object.keys(completeResult).length ? completeResult : undefined, result] as const
+}

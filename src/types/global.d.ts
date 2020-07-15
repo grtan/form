@@ -1,4 +1,5 @@
 declare module 'big.js'
+declare module 'qs'
 
 // 获取promise或者async函数返回值的实际数据类型
 type Unwrap<T> = T extends Promise<infer U> ? U :

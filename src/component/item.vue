@@ -2,151 +2,184 @@
   <el-form
     v-if="!hidden"
     ref="form"
-    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBase,'fm-item--invalid':error},schema.className]"
-    :label-width="`${isBase?global.labelWidth:0}px`"
+    :class="['fm-item__root',{'fm-item--root':isRoot,'fm-item--combined':!isBaseUI,'fm-item--invalid':error},schema.className]"
+    :label-width="`${isBaseUI?global.labelWidth:0}px`"
     size="mini"
     :model="model"
     :rules="rules"
     :status-icon="true"
-    :show-message="isBase"
+    :show-message="isBaseUI"
     :inline-message="true"
     @validate="onValidate"
   >
     <el-form-item
-      :label="isBase?schema.title:''"
+      :label="isBaseUI?schema.title:''"
       prop="value"
     >
       <!-- 对象 -->
       <template v-if="schema.type==='object'">
-        <el-collapse
-          v-if="value&&!isBase"
-          :class="{'fm-item--root':isRoot}"
-          :value="['1']"
-        >
-          <el-collapse-item
-            name="1"
-            :disabled="isRoot"
+        <template v-if="value">
+          <!-- 单选 -->
+          <div
+            v-if="schema.enum"
+            :class="['fm-item__content',{'fm-item__content--valid':!error}]"
           >
-            <div
-              slot="title"
-              class="fm-item__header"
-            >
-              <el-row
-                type="flex"
-                justify="space-between"
-              >
-                <el-col :span="15">
-                  <span
-                    class="fm-item__label"
-                    :style="{width:`${global.labelWidth}px`}"
-                    :data-required="required?'*':''"
-                  >{{ schema.title }}</span>
-                  <span
-                    v-if="schema.description"
-                    class="fm-item__description"
-                  >{{ schema.description }}</span>
-                </el-col>
-                <el-col
-                  v-if="error"
-                  class="fm-item__error"
-                  :span="7"
-                >
-                  {{ error }}
-                </el-col>
-              </el-row>
-            </div>
-            <component
-              :is="typeof schema.component==='function'?schema.component():'v-object'"
-              ref="object"
+            <v-enum
               :schema="schema"
               :value="value"
-              @validate="$set(validateResult.properties, ...arguments)"
-              @destroy="$delete(validateResult.properties,$event)"
             />
-          </el-collapse-item>
-        </el-collapse>
-        <!-- excel -->
-        <div
-          v-if="value&&schema.format==='excel'"
-          :class="['fm-item__content',{'fm-item__content--valid':!error}]"
-        >
-          <v-excel
-            ref="object"
-            :schema="schema"
-            :value="value"
-            @validate="$set(validateResult.properties, ...arguments)"
-            @destroy="$delete(validateResult.properties,$event)"
-          />
-          <div
-            v-if="schema.description"
-            class="fm-item__description--content"
-          >
-            {{ schema.description }}
+            <div
+              v-if="schema.description"
+              class="fm-item__description--content"
+            >
+              {{ schema.description }}
+            </div>
           </div>
-        </div>
+          <!-- excel导入数据 -->
+          <div
+            v-else-if="schema.format==='excel'"
+            :class="['fm-item__content',{'fm-item__content--valid':!error}]"
+          >
+            <v-excel
+              :schema="schema"
+              :value="value"
+            />
+            <div
+              v-if="schema.description"
+              class="fm-item__description--content"
+            >
+              {{ schema.description }}
+            </div>
+          </div>
+          <el-collapse
+            v-else
+            :class="{'fm-item--root':isRoot}"
+            :value="['1']"
+          >
+            <el-collapse-item
+              name="1"
+              :disabled="isRoot"
+            >
+              <div
+                slot="title"
+                class="fm-item__header"
+              >
+                <el-row
+                  type="flex"
+                  justify="space-between"
+                >
+                  <el-col :span="15">
+                    <span
+                      class="fm-item__label"
+                      :style="{width:`${global.labelWidth}px`}"
+                      :data-required="required?'*':''"
+                    >{{ schema.title }}</span>
+                    <span
+                      v-if="schema.description"
+                      class="fm-item__description"
+                    >{{ schema.description }}</span>
+                  </el-col>
+                  <el-col
+                    v-if="error"
+                    class="fm-item__error"
+                    :span="7"
+                  >
+                    {{ error }}
+                  </el-col>
+                </el-row>
+              </div>
+              <component
+                :is="typeof schema.component==='function'?schema.component():'v-object'"
+                ref="object"
+                :schema="schema"
+                :value="value"
+                @validate="$set(validateResult.properties, ...arguments)"
+                @destroy="$delete(validateResult.properties,$event)"
+              />
+            </el-collapse-item>
+          </el-collapse>
+        </template>
       </template>
 
       <!-- 数组 -->
       <template v-else-if="schema.type==='array'">
-        <el-collapse
-          v-if="value"
-          :class="{'fm-item--root':isRoot}"
-          :value="['1']"
-        >
-          <el-collapse-item
-            name="1"
-            :disabled="isRoot"
+        <template v-if="value">
+          <!-- 多选 -->
+          <div
+            v-if="schema.enum"
+            :class="['fm-item__content',{'fm-item__content--valid':!error}]"
           >
-            <div
-              slot="title"
-              class="fm-item__header"
-            >
-              <el-row
-                type="flex"
-                justify="space-between"
-              >
-                <el-col :span="12">
-                  <span
-                    class="fm-item__label"
-                    :style="{width:`${global.labelWidth}px`}"
-                    :data-required="required?'*':''"
-                  >{{ schema.title }}</span>
-                  <span
-                    v-if="schema.description"
-                    class="fm-item__description"
-                  >{{ schema.description }}</span>
-                </el-col>
-                <el-col
-                  v-if="error"
-                  class="fm-item__error"
-                  :span="8"
-                >
-                  {{ error }}
-                </el-col>
-                <el-col
-                  v-if="typeof schema.component!=='function'"
-                  class="fm-item__add"
-                  :span="4"
-                >
-                  <el-button
-                    type="primary"
-                    @click.stop="$refs.array.onAdd"
-                  >
-                    新增
-                  </el-button>
-                </el-col>
-              </el-row>
-            </div>
-            <component
-              :is="typeof schema.component==='function'?schema.component():'v-array'"
-              ref="array"
+            <v-enum
               :schema="schema"
               :value="value"
-              @validate="$set(validateResult.items, ...arguments)"
-              @destroy="validateResult.items.splice($event, 1)"
             />
-          </el-collapse-item>
-        </el-collapse>
+            <div
+              v-if="schema.description"
+              class="fm-item__description--content"
+            >
+              {{ schema.description }}
+            </div>
+          </div>
+          <el-collapse
+            v-else
+            :class="{'fm-item--root':isRoot}"
+            :value="['1']"
+          >
+            <el-collapse-item
+              name="1"
+              :disabled="isRoot"
+            >
+              <div
+                slot="title"
+                class="fm-item__header"
+              >
+                <el-row
+                  type="flex"
+                  justify="space-between"
+                >
+                  <el-col :span="12">
+                    <span
+                      class="fm-item__label"
+                      :style="{width:`${global.labelWidth}px`}"
+                      :data-required="required?'*':''"
+                    >{{ schema.title }}</span>
+                    <span
+                      v-if="schema.description"
+                      class="fm-item__description"
+                    >{{ schema.description }}</span>
+                  </el-col>
+                  <el-col
+                    v-if="error"
+                    class="fm-item__error"
+                    :span="8"
+                  >
+                    {{ error }}
+                  </el-col>
+                  <el-col
+                    v-if="typeof schema.component!=='function'"
+                    class="fm-item__add"
+                    :span="4"
+                  >
+                    <el-button
+                      type="primary"
+                      @click.stop="$refs.array.onAdd"
+                    >
+                      新增
+                    </el-button>
+                  </el-col>
+                </el-row>
+              </div>
+              <component
+                :is="typeof schema.component==='function'?schema.component():'v-array'"
+                ref="array"
+                :schema="schema"
+                :value="value"
+                @validate="$set(validateResult.items, ...arguments)"
+                @destroy="validateResult.items.splice($event, 1)"
+              />
+            </el-collapse-item>
+          </el-collapse>
+        </template>
       </template>
 
       <!-- 基本类型、地址、时间范围 -->
@@ -321,80 +354,22 @@
 
 <script>
 import Big from 'big.js'
+import { checkValidation, validateValue } from '../util/validate'
 import VObject from './object'
 import VExcel from './excel'
 import VArray from './array'
 import VBase from './base'
+import VEnum from './enum'
 
 function noop () { }
-
-/**
- * 遍历校验结果并过滤掉一些无用数据
- * valid 表示整个表单是否校验通过
- */
-function travel (item = {}, valid = true) {
-  const result = {}
-
-  Object.keys(item).forEach(function (key) {
-    const properties = {}
-    const items = []
-
-    switch (key) {
-      case 'valid':
-      case 'message':
-        result[key] = item[key]
-
-        if (key === 'valid' && !result[key]) {
-          valid = result[key]
-        }
-
-        break
-      case 'properties':
-        Object.keys(item[key]).forEach(function (prop) {
-          const [child, val] = travel(item[key][prop], valid)
-
-          if (child) {
-            properties[prop] = child
-          }
-
-          if (!val) {
-            valid = val
-          }
-        })
-
-        if (Object.keys(properties).length) {
-          result[key] = properties
-        }
-        break
-      case 'items':
-        item[key].forEach(function (item) {
-          const [child, val] = travel(item, valid)
-
-          items.push(child)
-
-          if (!val) {
-            valid = val
-          }
-        })
-
-        if (items.some(function (child) {
-          return child
-        })) {
-          result[key] = items
-        }
-        break
-    }
-  })
-
-  return [Object.keys(result).length ? result : undefined, valid]
-}
 
 export default {
   components: {
     VObject,
     VExcel,
     VArray,
-    VBase
+    VBase,
+    VEnum
   },
   provide () {
     return this.provideData
@@ -447,8 +422,8 @@ export default {
         }
       } : {}
     },
-    isBase () { // 是不是基础展示类型
-      return !['object', 'array'].includes(this.schema.type) || (this.schema.type === 'object' && this.schema.format === 'excel')
+    isBaseUI () { // 是不是基础展示类型
+      return !['object', 'array'].includes(this.schema.type) || !!this.schema.enum || (this.schema.type === 'object' && this.schema.format === 'excel')
     },
     global () { // 全局数据
       return !this.isRoot ? this.fmGlobal : this.provideData.fmGlobal
@@ -538,12 +513,13 @@ export default {
       switch (schema.type) {
         case 'object':
           data = this.validateResult || {
-            properties: {}
+            // 基础UI展示类型没有后代校验结果
+            ...(this.isBaseUI ? undefined : { properties: {} })
           }
           break
         case 'array':
           data = this.validateResult || {
-            items: []
+            ...(this.isBaseUI ? undefined : { items: [] })
           }
           break
         default:
@@ -557,7 +533,8 @@ export default {
         value: this.value
       }
     },
-    rules () { // 校验规则
+    // 校验规则，除了主动调用form组件validate方法外，后代input、radio、checkbox等组件blur或值变化时都会触发校验
+    rules () {
       const {
         type,
         format,
@@ -700,20 +677,39 @@ export default {
 
           break
         case type === 'object':
-          if (format === 'excel') {
+          // 单选或excel导入数据
+          if (this.schema.enum || format === 'excel') {
             rules.value.push({
               validator: (rule, value, callback) => {
-                const prop = Object.keys(this.validateResult.properties).find(prop => {
-                  return !this.validateResult.properties[prop].valid
-                })
+                const { valid, path } = validateValue(this.schema, this.value)
+                let message = ''
 
-                if (prop !== undefined) {
-                  const { message } = this.validateResult.properties[prop]
+                if (!valid) {
+                  if (this.schema.enum) {
+                    message = `${path}位置`
+                  } else if (format === 'excel') {
+                    const sheet = path.replace(/^\.([^[]+).*$/, '$1')
+                    const row = path.replace(/^\.[^[]+(?:\[(\d+)\].*)?$/, '$1')
+                    const column = path.replace(/^\.[^[]+(?:\[\d+\](?:\.(.*))?)?$/, '$1')
 
-                  return callback(new Error(`工作表${prop}${message}`))
+                    if (sheet) {
+                      message += `工作表${sheet}`
+
+                      if (row) {
+                        // 行数包含标题行
+                        message += `第${Number(row) + 2}行`
+
+                        if (column) {
+                          message += `${column}列`
+                        }
+                      }
+                    }
+                  }
+
+                  message += '校验失败'
                 }
 
-                callback()
+                callback(valid ? undefined : new Error(message))
               }
             })
           }
@@ -779,6 +775,33 @@ export default {
               callback()
             }
           })
+
+          // 多选
+          if (this.schema.enum) {
+            rules.value.push({
+              validator: (rule, value, callback) => {
+                const { valid, path } = validateValue(this.schema, this.value)
+                let message = ''
+
+                if (!valid) {
+                  const index = path.replace(/^\[(\d+)\].*$/, '$1')
+                  const pos = path.replace(/^\[\d+\](.*)$/, '$1')
+
+                  if (index) {
+                    message += `第${Number(index) + 1}个选项`
+
+                    if (pos) {
+                      message += `的位置${pos}`
+                    }
+                  }
+
+                  message += '校验失败'
+                }
+
+                callback(valid ? undefined : new Error(message))
+              }
+            })
+          }
 
           break
       }
@@ -907,8 +930,11 @@ export default {
       this.$refs.array && this.$refs.array.validate()
       // 根组件
       this.isRoot && this.$nextTick(function () {
-        // eslint-disable-next-line standard/no-callback-literal
-        typeof callback === 'function' && callback(...travel(this.validateResult).reverse())
+        if (typeof callback === 'function') {
+          const [completeResult, { valid }] = checkValidation(this.validateResult)
+
+          callback(valid, completeResult)
+        }
       })
     }
   }

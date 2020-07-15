@@ -7,7 +7,7 @@
       :schema="schema"
       :label-width="labelWidth"
     />
-    <div class="fm__footer">
+    <div v-if="submit" class="fm__footer">
       <el-button
         type="primary"
         @click="onConfirm"
@@ -16,7 +16,7 @@
       </el-button>
       <el-button
         type="warning"
-        @click="setValue(defaultValue)"
+        @click="reset"
       >
         重置
       </el-button>
@@ -55,8 +55,8 @@ export default {
       type: Object
     },
     submit: {
-      required: true,
-      type: Function
+      type: Function,
+      default: undefined
     },
     labelWidth: {
       type: Number,
@@ -84,16 +84,25 @@ export default {
   },
   methods: {
     setValue (value, validate = true) {
-      this.value = value === undefined ? undefined : JSON.parse(JSON.stringify(value))
+      this.value = value && JSON.parse(JSON.stringify(value))
       // 重置时有些字段还是初始值没有进行编辑，无法触发自动校验，只能手动进行校验
       validate && this.$nextTick(function () {
         this.$refs.form.validate()
       })
     },
+    getValue () {
+      // this.value为undefined时JSON.parse会报错
+      return this.value && JSON.parse(JSON.stringify(this.value))
+    },
+    validate (callback) {
+      this.$refs.form.validate(callback)
+    },
+    reset () {
+      this.setValue(this.defaultValue)
+    },
     onConfirm () {
-      this.$refs.form.validate((valid, detail) => {
-        // this.value为undefined时JSON.parse会报错
-        valid && this.submit(this.value && JSON.parse(JSON.stringify(this.value)))
+      this.validate((valid, completeResult) => {
+        valid && this.submit && this.submit(this.getValue())
       })
     }
   }

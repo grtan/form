@@ -9,7 +9,7 @@
       :on-change="onChange"
       :on-remove="onDelete"
     >
-      <el-button size="small" type="primary">
+      <el-button size="small" type="primary" plain>
         选择excel文件
       </el-button>
     </el-upload>
@@ -43,7 +43,6 @@
 
 <script>
 import XLSX from 'xlsx'
-import { validateValue } from '../util/validate'
 
 export default {
   props: {
@@ -62,33 +61,6 @@ export default {
     }
   },
   methods: {
-    validate () { // 校验各属性
-      Object.keys(this.schema.properties).forEach(sheet => {
-        const { valid, path } = validateValue(this.schema.properties[sheet], this.value[sheet])
-        let message = ''
-
-        if (!valid) {
-          const row = path.replace(/^\[(\d+)\]\..*$/, '$1')
-          const column = path.replace(/^\[\d+\]\.(.*)$/, '$1')
-
-          if (row) {
-            // 行数包含标题行
-            message += `第${Number(row) + 2}行`
-
-            if (column) {
-              message += `${column}列`
-            }
-          }
-
-          message += '校验失败'
-        }
-
-        this.$emit('validate', sheet, {
-          valid,
-          message
-        })
-      })
-    },
     onChange ({ name, raw: file }) {
       const reader = new FileReader()
 
@@ -96,7 +68,6 @@ export default {
         const data = new Uint8Array(e.target.result)
         const workbook = XLSX.read(data, {
           type: 'array'
-          // cellDates: true
         })
 
         Object.keys(this.schema.properties).forEach(sheet => {
@@ -104,14 +75,6 @@ export default {
             const fixedRow = {}
 
             Object.keys(this.schema.properties[sheet].items.properties).forEach(column => {
-              // switch (true) {
-              //   // 将日期对象转换成时间戳
-              //   case row[column] instanceof Date:
-              //     console.log(JSON.parse(JSON.stringify(row)))
-              //     row[column] = row[column].getTime()
-              //     break
-              // }
-
               fixedRow[column] = row[column] !== undefined ? row[column] : undefined
             })
 
@@ -120,13 +83,12 @@ export default {
 
           /**
            * 必须要先执行$delete，在执行$set。
-           * 如果只执行$set，因为这些属性已经存在了，不会触发value的watch
+           * 如果只执行$set，因为这些属性已经存在了，不会触发value的watch，导致item组件不会进行校验
            * 一个事件循环内即使改变多次value，由于vue内部做了优化，也只会触发一次watch
            */
           this.$delete(this.value, sheet)
           this.$set(this.value, sheet, list)
         })
-        this.validate()
       }
       reader.readAsArrayBuffer(file)
       // 文件列表始终只显示最新的文件
@@ -139,7 +101,6 @@ export default {
         this.$delete(this.value, sheet)
         this.$set(this.value, sheet, [])
       })
-      this.validate()
     }
   }
 }
