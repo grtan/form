@@ -9,7 +9,7 @@
       :on-change="onChange"
       :on-remove="onDelete"
     >
-      <el-button size="small" type="primary" plain>
+      <el-button size="small" type="primary">
         选择excel文件
       </el-button>
     </el-upload>

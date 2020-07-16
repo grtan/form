@@ -91,7 +91,7 @@ export default {
       })
     },
     getValue () {
-      // this.value为undefined时JSON.parse会报错
+      // this.value为undefined时JSON.parse会报错，注意JSON.stringify默认会对undefined进行特殊处理
       return this.value && JSON.parse(JSON.stringify(this.value))
     },
     validate (callback) {

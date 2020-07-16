@@ -34,7 +34,7 @@
     >
       <!-- color -->
       <el-tooltip
-        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['color'].includes(isMultiple?schema.items.format:schema.format)"
         :content="String(itemValue)"
         :disabled="!name"
         placement="bottom"
@@ -92,7 +92,7 @@
     >
       <!-- color -->
       <el-tooltip
-        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
+        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['color'].includes(isMultiple?schema.items.format:schema.format)"
         :content="String(itemValue)"
         :disabled="!name"
         placement="bottom"
@@ -179,7 +179,7 @@
         </el-button>
       </el-table-column>
     </el-table>
-    <el-button type="primary" plain @click="show=true">
+    <el-button type="primary" @click="show=true">
       选择
     </el-button>
     <el-dialog class="fm-enum__dialog" :visible.sync="show" width="75%" append-to-body>
