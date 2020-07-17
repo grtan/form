@@ -1,6 +1,6 @@
 {
   "name": "vcform",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "可配置的通用表单组件",
   "main": "dist/vcform.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "lodash-es": "^4.17.15",
     "moment": "^2.24.0",
     "qs": "^6.9.4",
-    "tinymce": "^5.1.5",
+    "tinymce": "^5.4.1",
     "tslib": "^2.0.0",
     "xlsx": "^0.16.3"
   },

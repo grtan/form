@@ -1,10 +1,11 @@
 <template>
-  <tinymce-editor :value="value" :init="config" @input="$listeners.input"></tinymce-editor>
+  <tinymce-editor :value="value" :init="config" @input="$listeners.input" />
 </template>
 
 <script>
 import 'tinymce/tinymce'
 import 'tinymce/themes/silver'
+import 'tinymce/icons/default'
 import TinymceEditor from '@tinymce/tinymce-vue'
 import './generate-resource' // 生成tinymce的资源
 
@@ -18,10 +19,11 @@ export default {
       type: Object
     },
     value: {
-      required: true
+      type: String,
+      default: undefined
     }
   },
-  data() {
+  data () {
     return {
       config: {
         height: 300,
