@@ -5,8 +5,7 @@ const instance = axios.create({
   withCredentials: true,
   timeout: 10000, // 请求超时时间
   headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-    'Content-Type': 'application/json'
+    'X-Requested-With': 'XMLHttpRequest'
   },
   paramsSerializer (params) {
     return qs.stringify(params, {

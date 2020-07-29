@@ -13,7 +13,7 @@
 </style>
 
 <script>
-import axios from 'axios'
+import axios from '../../util/axios'
 
 export default {
   props: {

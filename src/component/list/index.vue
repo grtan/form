@@ -192,7 +192,7 @@
 </style>
 
 <script>
-import axios from 'axios'
+import axios from '../../util/axios'
 import { debounce, cloneDeepWith } from 'lodash-es'
 import VBase from '../base'
 import VDisplay from './display'

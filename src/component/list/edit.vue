@@ -24,7 +24,7 @@
 </style>
 
 <script>
-import axios from 'axios'
+import axios from '../../util/axios'
 import VForm from '../../index'
 
 export default {

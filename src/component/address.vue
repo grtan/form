@@ -1,14 +1,15 @@
 <template>
-  <div class="fm-address__root" v-if="addressList">
+  <div v-if="addressList" class="fm-address__root">
     <el-cascader
       v-model="address"
       :options="addressList"
       :props="{expandTrigger: 'hover'}"
       :filterable="true"
       :disabled="schema.readonly"
-    ></el-cascader>
+    />
     <el-input
       v-if="format==='detail'"
+      v-model="detail"
       type="textarea"
       :rows="2"
       :maxlength="schema.maxLength"
@@ -16,8 +17,7 @@
       :show-word-limit="typeof schema.maxLength==='number'"
       :readonly="schema.readonly"
       placeholder="请输入地址详情"
-      v-model="detail"
-    ></el-input>
+    />
   </div>
 </template>
 
@@ -39,13 +39,7 @@
 </style>
 
 <script>
-import axios from 'axios'
-
-const axiosInstance = axios.create()
-
-axiosInstance.interceptors.response.use(function (response) {
-  return response.data
-})
+import axios from '../util/axios'
 
 export default {
   props: {
@@ -58,20 +52,20 @@ export default {
       type: Array
     }
   },
-  data() {
+  data () {
     return {
       addressList: undefined
     }
   },
   computed: {
-    format() {
+    format () {
       return this.schema.format || 'detail'
     },
-    filter() { // 是否过滤特殊地区
+    filter () { // 是否过滤特殊地区
       return this.schema.filter !== undefined ? !!this.schema.filter : true
     },
     address: {
-      get() {
+      get () {
         const value = this.value || []
 
         return value.slice(0, {
@@ -81,7 +75,7 @@ export default {
           detail: 3
         }[this.format])
       },
-      set(address) {
+      set (address) {
         const value = [...address]
 
         this.format === 'detail' && value.push(this.detail)
@@ -89,10 +83,10 @@ export default {
       }
     },
     detail: {
-      get() {
+      get () {
         return (this.value && this.value[3]) || ''
       },
-      set(detail) {
+      set (detail) {
         const value = [...this.value]
 
         value[3] = detail
@@ -100,13 +94,21 @@ export default {
       }
     }
   },
+  created () {
+    typeof this.schema.fetcher === 'function' ? this.schema.fetcher((address) => {
+      this.addressList = address
+    }) : this.getAddress()
+  },
   methods: {
-    async getAddress() {
-      const address = await axiosInstance.get(`//shequwsdl.vivo.com.cn/shequ/address_${this.filter ? 'filter' : 'full'}.json`)
+    async getAddress () {
+      const { data: address } = await axios.request({
+        url: `//shequwsdl.vivo.com.cn/shequ/address_${this.filter ? 'filter' : 'full'}.json`,
+        withCredentials: false
+      })
 
       this.addressList = this.formatAddress(address)
     },
-    formatAddress(address, level = 0) { // 格式化地址数据
+    formatAddress (address, level = 0) { // 格式化地址数据
       const data = []
       const target = {
         province: 0,
@@ -139,11 +141,6 @@ export default {
 
       return data
     }
-  },
-  created() {
-    typeof this.schema.fetcher === 'function' ? this.schema.fetcher((address) => {
-      this.addressList = address
-    }) : this.getAddress()
   }
 }
 </script>
