@@ -1,6 +1,6 @@
 {
   "name": "vcform",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "可配置的通用表单组件",
   "main": "dist/vcform.js",
   "scripts": {

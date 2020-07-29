@@ -240,6 +240,18 @@ export default {
         }
       })
     },
+    // 主属性
+    primary () {
+      const primary = Object.keys(this.fixedSchema.properties).find(prop => {
+        return this.fixedSchema.properties[prop].primary
+      })
+
+      if (primary === undefined) {
+        throw new Error('List组件的properties中必须要存在唯一的primary属性')
+      }
+
+      return primary
+    },
     searchProps () {
       return Object.keys(this.fixedSchema.properties).filter(prop => {
         return this.fixedSchema.properties[prop].showInSearch
@@ -247,9 +259,9 @@ export default {
     },
     tableProps () {
       return {
-        ...{
-          height: 'auto'
-        },
+        height: 'auto',
+        // 默认以主键为行key
+        'row-key': this.primary,
         ...this.fixedSchema.table
       }
     },
