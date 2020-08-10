@@ -1,5 +1,5 @@
 <template>
-  <el-button class="fm-list-multi-delete__root" icon="el-icon-delete" @click="onDelete">
+  <el-button class="fm-list-multi-delete__root" icon="el-icon-delete" type="danger" @click="onDelete">
     批量删除
   </el-button>
 </template>

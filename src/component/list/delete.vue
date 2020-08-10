@@ -8,6 +8,7 @@
 .fm-list-delete {
   &__root {
     margin: 0 3px;
+    color: #f56c6c;
   }
 }
 </style>

@@ -156,7 +156,7 @@
     justify-content: space-between;
     align-items: flex-start;
     flex: none;
-    padding: 15px 0;
+    padding: 10px 0;
   }
 
   &__search {
@@ -167,7 +167,7 @@
     &-item {
       display: flex;
       align-items: center;
-      margin-right: 20px;
+      margin: 5px 15px 5px 0;
 
       > .fm-base__root {
         margin-left: 6px;
@@ -176,11 +176,16 @@
   }
 
   &__operations {
-    flex: none;
+    display: flex;
+    align-items: center;
     margin-left: 30px;
 
     > * {
-      margin-left: 10px;
+      margin: 5px 0 5px 10px;
+
+      &:first-child {
+        margin-left: 0;
+      }
     }
   }
 
