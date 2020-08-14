@@ -458,9 +458,11 @@ export default {
             const hidden = this.isHidden(schema.properties[prop])
 
             if (hidden) {
+              // eslint-disable-next-line no-prototype-builtins
               return data.hasOwnProperty(prop) && this.$delete(data, prop)
             }
 
+            // eslint-disable-next-line no-prototype-builtins
             if (!data.hasOwnProperty(prop)) {
               // 给子属性设置初始值，不能统一设置成undefined，不然基本类型有默认值时初始化时就会触发校验
               /**
@@ -888,6 +890,7 @@ export default {
         if (typeof expression === 'string') {
           // 必须要将this.rootData的影响范围降到最小，否则rootData被修改后所有字段的fixedValue都要重新计算
           const data = JSON.parse(JSON.stringify(this.global.value))
+          // eslint-disable-next-line no-new-func
           const fn = new Function('data', `return !!(${expression})`)
 
           hidden = fn(data)
