@@ -92,7 +92,6 @@ export default {
         this.$message.success('新增成功')
         this.show = false
         this.actions.setSearch()
-        this.actions.query()
       })
     }
   }

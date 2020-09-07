@@ -129,7 +129,7 @@
     </el-table>
     <el-pagination
       v-if="fixedSchema.pagination&&total"
-      :current-page.sync="search.page"
+      :current-page.sync="page"
       :total="total"
       :page-size="pageSize"
       layout="total, prev, pager, next, jumper"
@@ -228,6 +228,7 @@ export default {
       list: [],
       total: 0,
       pageSize: 15,
+      page: 1,
       search: {}, // 查询条件
       selection: [], // 选中的行数据
       actions: {
@@ -287,8 +288,13 @@ export default {
   watch: {
     search: {
       deep: true,
-      handler: 'query'
-    }
+      handler () {
+        // 查询条件变化时需要查询第一页
+        this.page = 1
+        this.query()
+      }
+    },
+    page: 'query'
   },
   created () {
     this.setSearch()
@@ -296,22 +302,33 @@ export default {
   methods: {
     setSearch (search) {
       if (search) {
+        const page = search.page || this.page
+
+        search = { ...search }
+        delete search.page
         this.search = {
           ...this.search,
           ...search
         }
+        // 确保不会自动设置成第一页
+        this.$nextTick(() => {
+          this.page = page
+        })
+
         return
       }
 
       // 重置搜索条件
-      search = this.fixedSchema.pagination ? { page: 1 } : {}
+      search = {}
       this.searchProps.forEach(prop => {
         search[prop] = this.fixedSchema.properties[prop].default
       })
       this.search = search
     },
-    query: debounce(async function () {
-      const params = {}
+    query: debounce(function () {
+      const params = {
+        page: this.page
+      }
 
       Object.keys(this.search).forEach(prop => {
         if (this.search[prop] !== undefined) {
@@ -324,11 +341,11 @@ export default {
 
         if (this.fixedSchema.pagination) {
           this.total = total
-          this.search.page = page
+          this.page = page
           this.pageSize = pageSize
         }
       })
-    }, 400),
+    }, 300),
     onSelectionChange (selection) {
       this.selection = selection
     }
