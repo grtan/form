@@ -1,5 +1,6 @@
 <template>
-  <tinymce-editor :value="value" :init="config" @input="$listeners.input" />
+  <!-- value为undefined时必须设置成空字符串，否则编辑器内容不会变化 -->
+  <tinymce-editor :value="value||''" :init="config" @input="$listeners.input" />
 </template>
 
 <script>

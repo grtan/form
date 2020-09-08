@@ -11,6 +11,7 @@
     :headers="schema.headers"
     :with-credentials="schema.withCredentials"
     :accept="schema.accept"
+    :data="schema.data"
     :file-list="list"
     :before-upload="onBeforeUpload"
     :on-success="onSuccess"

@@ -41,7 +41,7 @@
 
 > 当`format`为`color`时，还支持`showAlpha`、`colorFormat`、`predefine`属性，与`element-ui`的[ColorPicker](https://element.eleme.cn/#/zh-CN/component/color-picker)组件一致
 
-> 当`format`为`image`、`video`、`file`时，还支持`action`、`name`、`headers`、`withCredentials`和`accept`属性，与`element-ui`的[Upload](https://element.eleme.cn/#/zh-CN/component/upload)组件一致
+> 当`format`为`image`、`video`、`file`时，还支持`action`、`name`、`headers`、`withCredentials`、`data` **(v1.0.1+)** 和`accept`属性，与`element-ui`的[Upload](https://element.eleme.cn/#/zh-CN/component/upload)组件一致
 
 ```
 {
