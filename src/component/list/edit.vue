@@ -112,7 +112,14 @@ export default {
   },
   methods: {
     async submit (value) {
+      if (this.editing) {
+        return
+      }
+
+      this.editing = true
       this.schema.edit({ ...this.row, ...value }, axios, (fail) => {
+        this.editing = false
+
         if (fail) {
           this.$message.error('修改失败')
           return

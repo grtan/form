@@ -43,7 +43,14 @@ export default {
         type: 'warning'
       })
 
+      if (this.deleting) {
+        return
+      }
+
+      this.deleting = true
       this.schema.multiDelete(this.selection, axios, (fail) => {
+        this.deleting = false
+
         if (fail) {
           this.$message.error('删除失败')
           return

@@ -83,7 +83,14 @@ export default {
   },
   methods: {
     async submit (value) {
+      if (this.adding) {
+        return
+      }
+
+      this.adding = true
       this.schema.add(value, axios, (fail) => {
+        this.adding = false
+
         if (fail) {
           this.$message.error('新增失败')
           return
