@@ -117,11 +117,12 @@ export default {
       }
 
       this.editing = true
-      this.schema.edit({ ...this.row, ...value }, axios, (fail) => {
+      this.schema.edit({ ...this.row, ...value }, axios, (error) => {
         this.editing = false
 
-        if (fail) {
-          this.$message.error('修改失败')
+        if (error) {
+          error = error instanceof Error ? error.message : '修改失败'
+          error && this.$message.error(error)
           return
         }
 

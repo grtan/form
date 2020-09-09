@@ -88,11 +88,13 @@ export default {
       }
 
       this.adding = true
-      this.schema.add(value, axios, (fail) => {
+      this.schema.add(value, axios, (error) => {
         this.adding = false
 
-        if (fail) {
-          this.$message.error('新增失败')
+        if (error) {
+          error = error instanceof Error ? error.message : '新增失败'
+          // 没有error信息时不提示
+          error && this.$message.error(error)
           return
         }
 

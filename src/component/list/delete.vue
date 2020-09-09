@@ -60,11 +60,12 @@ export default {
       }
 
       this.deleting = true
-      this.schema.delete(this.row, axios, (fail) => {
+      this.schema.delete(this.row, axios, (error) => {
         this.deleting = false
 
-        if (fail) {
-          this.$message.error('删除失败')
+        if (error) {
+          error = error instanceof Error ? error.message : '删除失败'
+          error && this.$message.error(error)
           return
         }
 
