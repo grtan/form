@@ -7,6 +7,7 @@
       :headers="schema.headers"
       :with-credentials="schema.withCredentials"
       :accept="schema.accept"
+      :data="schema.data"
       list-type="picture-card"
       :show-file-list="false"
       :before-upload="onBeforeUpload"
