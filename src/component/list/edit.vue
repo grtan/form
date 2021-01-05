@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     async submit(value) {
-      if (this.editing) {
+      if (this.editing || !this.show) {
         return
       }
 

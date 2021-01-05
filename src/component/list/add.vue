@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     async submit(value) {
-      if (this.adding) {
+      if (this.adding || !this.show) {
         return
       }
 
