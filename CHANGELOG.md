@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0-beta.1](https://gitlab.vmic.xyz///compare/v1.1.0-beta.0...v1.1.0-beta.1) (2021-01-05)
+
+
+### Bug Fixes
+
+* 解决服务端响应速度过快时，List组件新增、编辑界面快速双击确定按钮导致重复发起请求的问题 ([efd1ac0](https://gitlab.vmic.xyz///commit/efd1ac0717ca4375152821073e2ed3bf87db23cf))
+
 ## [1.1.0-beta.0](https://gitlab.vmic.xyz///compare/v1.0.3...v1.1.0-beta.0) (2020-12-24)
 
 
