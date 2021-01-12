@@ -1,0 +1,56 @@
+# 依赖镜像
+image: node:12.18.3
+
+# 步骤
+stages:
+  - tag
+  - publish-beta
+  - publish
+
+# master分支有提交时打正式版本tag
+tag:
+  stage: tag
+  script:
+    - echo "打正式版本tag"
+    - git config user.name "${GITLAB_USER_FULL_NAME}"
+    - git config user.email "${GITLAB_USER_EMAIL}"
+    - git remote set-url origin https://$GITLAB_USER_NAME:$GITLAB_USER_PWD@gitlab.vmic.xyz/game-common/form.git
+    - npm config set registry http://npm.vivo.com.cn/
+    - npm i -D standard-version
+    - npm run tag
+  only:
+    - master
+
+# 打beta版本tag时发布beta包
+publish-beta:
+  stage: publish-beta
+  script:
+    - echo "发布beta版本包到公司内部npm"
+    - npm config set registry http://npm.vivo.com.cn/
+    - npm i -g npm-cli-login
+    # 这里仓库地址后面不能加/，否则登录失败
+    - npm-cli-login -u tanxin -p vivo -e xin.tan@vivo.com -r http://npm.vivo.com.cn
+    - npm i
+    - npm publish --tag beta --unsafe-perm
+  only:
+    - tags
+  except:
+    # 正式版本标签
+    - /^v[\d.]+$/
+
+# 打正式版本tag时发布正式包
+publish:
+  stage: publish
+  script:
+    - echo "发布正式版本包到公司内部npm"
+    - npm config set registry http://npm.vivo.com.cn/
+    - npm i -g npm-cli-login
+    # 这里仓库地址后面不能加/，否则登录失败
+    - npm-cli-login -u tanxin -p vivo -e xin.tan@vivo.com -r http://npm.vivo.com.cn
+    - npm i
+    - npm publish --unsafe-perm
+  only:
+    - tags
+  except:
+    # 非正式版本标签
+    - /^v[\d.]+-.*$/

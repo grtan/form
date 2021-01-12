@@ -1,27 +1,11 @@
 <template>
   <span class="fm-list-edit__root">
-    <el-button type="text" @click.stop="show=true">
-      编辑
-    </el-button>
+    <el-button type="text" @click.stop="show = true"> 编辑 </el-button>
     <el-dialog :visible.sync="show" width="75%" append-to-body>
-      <v-form
-        v-if="showForm"
-        :key="formKey"
-        :schema="editSchema"
-        :default-value="row"
-        :submit="submit"
-      />
+      <v-form v-if="showForm" :key="formKey" :schema="editSchema" :default-value="row" :submit="submit" />
     </el-dialog>
   </span>
 </template>
-
-<style lang="less">
-.fm-list-edit {
-  &__root {
-    margin: 0 3px;
-  }
-}
-</style>
 
 <script>
 import axios from '../../util/axios'
@@ -29,7 +13,7 @@ import VForm from '../../index'
 
 export default {
   components: {
-    VForm (resolve) {
+    VForm(resolve) {
       resolve(VForm)
     }
   },
@@ -63,7 +47,7 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       show: false,
       showForm: false,
@@ -71,7 +55,7 @@ export default {
     }
   },
   computed: {
-    editSchema () {
+    editSchema() {
       const editSchema = {
         title: '编辑',
         type: 'object',
@@ -81,7 +65,8 @@ export default {
 
       Object.keys(this.schema.properties).forEach(prop => {
         if (this.schema.properties[prop].showInEdit) {
-          editSchema.required.push(prop)
+          // 在编辑对话框中是否必填
+          ;(this.schema.properties[prop].requiredInEdit ?? true) && editSchema.required.push(prop)
           editSchema.properties[prop] = { ...this.schema.properties[prop] }
 
           // 主键不能修改
@@ -95,7 +80,7 @@ export default {
     }
   },
   watch: {
-    show () {
+    show() {
       if (this.show) {
         clearTimeout(this.timeoutId)
         this.showForm = true
@@ -111,13 +96,13 @@ export default {
     }
   },
   methods: {
-    async submit (value) {
-      if (this.editing) {
+    async submit(value) {
+      if (this.editing || !this.show) {
         return
       }
 
       this.editing = true
-      this.schema.edit({ ...this.row, ...value }, axios, (error) => {
+      this.schema.edit({ ...this.row, ...value }, axios, error => {
         this.editing = false
 
         if (error) {
@@ -134,3 +119,11 @@ export default {
   }
 }
 </script>
+
+<style lang="less">
+.fm-list-edit {
+  &__root {
+    margin: 0 3px;
+  }
+}
+</style>

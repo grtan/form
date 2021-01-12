@@ -21,51 +21,47 @@ module.exports = {
       '@': path.resolve(__dirname, '../src')
     }
   },
-  externals: [
-    nodeExternals()
-  ],
+  externals: [nodeExternals()],
   optimization: {
     minimize: false
   },
   module: {
-    noParse (request) {
+    noParse(request) {
       // 不解析生成tinymce资源的js
       return /\/richtext\/generate-resource\.js$/.test(request)
     },
-    rules: [{
-      test: /\.tsx?$/,
-      exclude: /node_modules/,
-      use: [
-        'babel-loader',
-        'ts-loader'
-      ]
-    }, {
-      test: /\.jsx?$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader'
+    rules: [
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: ['babel-loader', 'ts-loader']
+      },
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
+      },
+      {
+        test: /\.(less|css)$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 2
+            }
+          },
+          'postcss-loader',
+          'less-loader'
+        ]
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
       }
-    }, {
-      test: /\.(less|css)$/,
-      use: [
-        'style-loader',
-        {
-          loader: 'css-loader',
-          options: {
-            importLoaders: 2
-          }
-        },
-        'postcss-loader',
-        'less-loader'
-      ]
-    }, {
-      test: /\.vue$/,
-      loader: 'vue-loader'
-    }]
+    ]
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-    new ProgressBarPlugin(),
-    new VueLoaderPlugin()
-  ]
+  plugins: [new CleanWebpackPlugin(), new ProgressBarPlugin(), new VueLoaderPlugin()]
 }

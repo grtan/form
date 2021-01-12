@@ -1,15 +1,8 @@
 <template>
   <span class="fm-list-add__root">
-    <el-button icon="el-icon-plus" @click="show=true">
-      新增
-    </el-button>
+    <el-button icon="el-icon-plus" @click="show = true"> 新增 </el-button>
     <el-dialog :visible.sync="show" width="75%" append-to-body>
-      <v-form
-        v-if="formKey"
-        :key="formKey"
-        :schema="addSchema"
-        :submit="submit"
-      />
+      <v-form v-if="formKey" :key="formKey" :schema="addSchema" :submit="submit" />
     </el-dialog>
   </span>
 </template>
@@ -20,7 +13,7 @@ import VForm from '../../index'
 
 export default {
   components: {
-    VForm (resolve) {
+    VForm(resolve) {
       resolve(VForm)
     }
   },
@@ -46,14 +39,14 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       show: false,
       formKey: 0
     }
   },
   computed: {
-    addSchema () {
+    addSchema() {
       const addSchema = {
         title: '新增',
         type: 'object',
@@ -63,7 +56,7 @@ export default {
 
       Object.keys(this.schema.properties).forEach(prop => {
         if (this.schema.properties[prop].showInAdd) {
-          addSchema.required.push(prop)
+          ;(this.schema.properties[prop].requiredInAdd ?? true) && addSchema.required.push(prop)
           addSchema.properties[prop] = this.schema.properties[prop]
         }
       })
@@ -72,7 +65,7 @@ export default {
     }
   },
   watch: {
-    show () {
+    show() {
       if (!this.show) {
         return
       }
@@ -82,13 +75,13 @@ export default {
     }
   },
   methods: {
-    async submit (value) {
-      if (this.adding) {
+    async submit(value) {
+      if (this.adding || !this.show) {
         return
       }
 
       this.adding = true
-      this.schema.add(value, axios, (error) => {
+      this.schema.add(value, axios, error => {
         this.adding = false
 
         if (error) {

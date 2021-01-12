@@ -1,0 +1,27 @@
+{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.configPath": "",
+  "prettier.disableLanguages": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "css",
+    "vue"
+  ],
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "css.validate": false,
+  "vetur.format.enable": false,
+  "eslint.nodePath": "",
+  "eslint.options": {
+    "configFile": ""
+  }
+}

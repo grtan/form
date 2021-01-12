@@ -1,17 +1,5 @@
-/build
-/custom-component-demo
-/demo
-/docs
-/*.js
-node_modules
-.gitignore
-.npmignore
-
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Editor directories and files
-.idea
-.vscode
+/*
+!/dist/
+!/src/
+!/README.md
+!/CHANGELOG.md
