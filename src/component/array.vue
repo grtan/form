@@ -1,52 +1,30 @@
 <template>
   <div class="fm-array__root">
-    <el-row
-      v-for="(item,index) in value"
-      :key="index"
-      type="flex"
-      justify="space-between"
-      align="middle"
-    >
+    <el-row v-for="(item, index) in value" :key="index" type="flex" justify="space-between" align="middle">
       <el-col :span="20">
         <v-item
           ref="items"
           :schema="schema.items"
           :value="value[index]"
-          @input="$event!==value[index]&&$set(value,index,$event)"
-          @validate="$emit('validate',index,$event)"
-          @destroy="$emit('destroy',index)"
+          :path="`${path}[${index}]`"
+          @input="$event !== value[index] && $set(value, index, $event)"
+          @validate="$emit('validate', index, $event)"
+          @destroy="$emit('destroy', index)"
         />
       </el-col>
-      <el-col
-        class="fm-array__delete"
-        :span="3"
-      >
-        <el-button
-          type="danger"
-          @click="onDelete(index)"
-        >
-          删除
-        </el-button>
+      <el-col class="fm-array__delete" :span="3">
+        <el-button type="danger" @click="onDelete(index)"> 删除 </el-button>
       </el-col>
     </el-row>
   </div>
 </template>
-
-<style lang="less">
-.fm-array {
-  &__delete {
-    padding-right: 42px;
-    text-align: right;
-  }
-}
-</style>
 
 <script>
 import VItem from './item'
 
 export default {
   components: {
-    VItem (resolve) {
+    VItem(resolve) {
       resolve(VItem)
     }
   },
@@ -58,10 +36,14 @@ export default {
     value: {
       required: true,
       type: Array
+    },
+    path: {
+      type: String,
+      required: true
     }
   },
   methods: {
-    onAdd () {
+    onAdd() {
       let { type, default: defaultValue } = this.schema.items
       let value
 
@@ -84,16 +66,28 @@ export default {
           value = typeof defaultValue === type ? defaultValue : undefined
       }
 
+      // eslint-disable-next-line vue/no-mutating-props
       this.value.push(value)
     },
-    onDelete (index) {
+    onDelete(index) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.value.splice(index, 1)
     },
-    validate () { // 校验整个表单
-      ; (this.$refs.items || []).forEach(function (item) {
+    validate() {
+      // 校验整个表单
+      ;(this.$refs.items || []).forEach(function (item) {
         item.validate()
       })
     }
   }
 }
 </script>
+
+<style lang="less">
+.fm-array {
+  &__delete {
+    padding-right: 42px;
+    text-align: right;
+  }
+}
+</style>

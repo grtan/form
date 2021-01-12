@@ -5,7 +5,7 @@ module.exports = {
     'stylelint-prettier/recommended'
   ],
   rules: {
-    'max-nesting-depth': 4,
+    'max-nesting-depth': 6,
     // 兼容vue深度作用选择器
     'selector-pseudo-element-no-unknown': [
       true,
