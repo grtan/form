@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0-beta.2](https://gitlab.vmic.xyz///compare/v1.1.0-beta.1...v1.1.0-beta.2) (2021-01-12)
+
+
+### Features
+
+* 通用配置className支持函数形式 ([e8f46f7](https://gitlab.vmic.xyz///commit/e8f46f736b355079972ea81d3fec9b01092a9af6))
+
 ## [1.1.0-beta.1](https://gitlab.vmic.xyz///compare/v1.1.0-beta.0...v1.1.0-beta.1) (2021-01-05)
 
 
