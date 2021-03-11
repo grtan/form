@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0-beta.0](https://gitlab.vmic.xyz///compare/v1.1.0-beta.2...v1.2.0-beta.0) (2021-03-11)
+
+
+### Features
+
+* base组件中的input增加placeholder配置 ([42cbb36](https://gitlab.vmic.xyz///commit/42cbb36c5a7d9129603f8f530f54e74557abf56e))
+
 ## [1.1.0](https://gitlab.vmic.xyz///compare/v1.1.0-beta.2...v1.1.0) (2021-01-12)
 
 ## [1.1.0-beta.2](https://gitlab.vmic.xyz///compare/v1.1.0-beta.1...v1.1.0-beta.2) (2021-01-12)
