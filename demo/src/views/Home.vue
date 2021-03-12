@@ -62,8 +62,8 @@
 <script>
 import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api'
 import { debounce } from 'lodash-es'
-import VcForm from 'vcform'
-// import VcForm from '../../../src/index'
+// import VcForm from 'vcform'
+import VcForm from '../../../src/index'
 
 const monaco = { editor, MarkerSeverity }
 const code = (function () {
@@ -145,6 +145,17 @@ const code = (function () {
           },
           // default: 'https://shopstatic.vivo.com.cn/vivoshop/commodity/20191216/20191216180402203875_original.jpg',
           hidden: 'data.key2===2'
+        },
+        key11: {
+          title: '视频',
+          description: '当比例为2时隐藏',
+          type: 'string',
+          format: 'image',
+          progressWidth: 20,
+          action: 'https://game-tfu.vivo.com.cn/upload?certMode=1',
+          urlFetcher () {
+            return 'https://shopstatic.vivo.com.cn/vivoshop/commodity/99/10001399_1566458712423_750x750.png'
+          }
         },
         key23: {
           title: '文件',
