@@ -57,7 +57,7 @@
 <script>
 import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api'
 import { debounce } from 'lodash-es'
-import { List as VcList } from 'vcform'
+import { List as VcList } from '../../../src/index'
 
 const monaco = { editor, MarkerSeverity }
 const code = (function () {

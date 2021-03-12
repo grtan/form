@@ -72,11 +72,12 @@ export default {
       // 检验失败后不会上传文件
       return this.schema.fileValidator(file, this.onValidateFail)
     },
-    onProgress(event, file, fileList) {
-      if (typeof this.schema.fileProgress !== 'function') {
+    onProgress() {
+      if (typeof this.schema.onProgress !== 'function') {
         return
       }
-      return this.schema.fileProgress(event, file, fileList)
+
+      return this.schema.onProgress(...arguments)
     },
     onSuccess(res, file) {
       let url

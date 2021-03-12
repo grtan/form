@@ -11,8 +11,8 @@
       list-type="picture-card"
       :show-file-list="false"
       :before-upload="onBeforeUpload"
-      :on-success="onSuccess"
       :on-progress="onProgress"
+      :on-success="onSuccess"
     >
       <el-progress
         v-if="schema.progressWidth && progress !== 0 && progress !== 100"

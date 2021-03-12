@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0-beta.1](https://gitlab.vmic.xyz///compare/v1.2.0-beta.0...v1.2.0-beta.1) (2021-03-12)
+
+
+### Features
+
+* file组件增加progress参数 ([1614839](https://gitlab.vmic.xyz///commit/1614839fe501813bf92223970a4b831b08d1fe1a))
+* 给image、file组件添加onProgress支持；修改文档 ([ae53c10](https://gitlab.vmic.xyz///commit/ae53c10ff088f94385d5b480ec913a6bd2880b81))
+
 ## [1.2.0-beta.0](https://gitlab.vmic.xyz///compare/v1.1.0-beta.2...v1.2.0-beta.0) (2021-03-11)
 
 
