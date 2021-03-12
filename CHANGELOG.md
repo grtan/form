@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0-beta.3](https://gitlab.vmic.xyz///compare/v1.2.0-beta.1...v1.2.0-beta.3) (2021-03-12)
+
+
+### Features
+
+* image组件增加上传进度 ([4769e4a](https://gitlab.vmic.xyz///commit/4769e4a01d87b65ef90fed528f49ba6be27bc73f))
+
+## [1.2.0-beta.2](https://gitlab.vmic.xyz///compare/v1.2.0-beta.1...v1.2.0-beta.2) (2021-03-12)
+
+
+### Features
+
+* image组件增加上传进度 ([4769e4a](https://gitlab.vmic.xyz///commit/4769e4a01d87b65ef90fed528f49ba6be27bc73f))
+
 ## [1.2.0-beta.1](https://gitlab.vmic.xyz///compare/v1.2.0-beta.0...v1.2.0-beta.1) (2021-03-12)
 
 
