@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0-beta.5](https://gitlab.vmic.xyz///compare/v1.2.0-beta.4...v1.2.0-beta.5) (2021-03-15)
+
+
+### Features
+
+* 文档使用vuepress，增加docsConfig配置 ([ac24ef8](https://gitlab.vmic.xyz///commit/ac24ef8cf293d70ef34a08c4955b4a6936ae486e))
+
 ## [1.2.0-beta.4](https://gitlab.vmic.xyz///compare/v1.2.0-beta.3...v1.2.0-beta.4) (2021-03-15)
 
 
