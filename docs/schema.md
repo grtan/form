@@ -352,5 +352,5 @@
 
 对应的 excel 文件如下，**每个单元格的数据类型只能为字符串和数字**
 
-![excel1](image/excel-1.png)
-![excel2](image/excel-2.png)
+![excel1](./image/excel-1.png)
+![excel2](./image/excel-2.png)

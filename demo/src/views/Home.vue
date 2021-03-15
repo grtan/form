@@ -62,8 +62,8 @@
 <script>
 import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api'
 import { debounce } from 'lodash-es'
-// import VcForm from 'vcform'
-import VcForm from '../../../src/index'
+import VcForm from 'vcform'
+// import VcForm from '../../../src/index'
 
 const monaco = { editor, MarkerSeverity }
 const code = (function () {
