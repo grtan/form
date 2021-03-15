@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0-beta.4](https://gitlab.vmic.xyz///compare/v1.2.0-beta.3...v1.2.0-beta.4) (2021-03-15)
+
+
+### Features
+
+* 增加上传资源大小的和图片长宽的判断 ([292163b](https://gitlab.vmic.xyz///commit/292163b9bc2cfdee4de837250a303e04d6f19048))
+
 ## [1.2.0-beta.3](https://gitlab.vmic.xyz///compare/v1.2.0-beta.1...v1.2.0-beta.3) (2021-03-12)
 
 
