@@ -151,6 +151,7 @@ const code = (function () {
           description: '当比例为2时隐藏',
           type: 'string',
           format: 'image',
+          maxSize: 1,
           progressWidth: 20,
           action: 'https://game-tfu.vivo.com.cn/upload?certMode=1',
           urlFetcher () {

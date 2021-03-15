@@ -68,8 +68,44 @@ export default {
     onValidateFail(reason) {
       reason && this.$emit('input', `validate:${reason}`)
     },
+    validateSize(file, maxWidth, maxHeight) {
+      const reader = new FileReader()
+      return new Promise((resolve, reject) => {
+        reader.onload = e => {
+          const data = e.target.result
+          const image = new Image()
+          image.onload = () => {
+            const { width, height } = image
+            if (maxWidth && maxHeight && (width > maxWidth || height > maxHeight)) {
+              reject(this.$message.error(`图片尺寸不能超过${maxWidth} * ${maxHeight}px`))
+            } else if (maxWidth && width > maxWidth) {
+              reject(this.$message.error(`图片宽度不能超过${maxWidth}px`))
+            } else if (maxHeight && height > maxHeight) {
+              reject(this.$message.error(`图片高度不能超过${maxHeight}px`))
+            } else {
+              resolve({ width, height })
+            }
+          }
+          image.src = data
+        }
+        reader.readAsDataURL(file)
+      })
+    },
     onBeforeUpload(file) {
       this.progress = 0
+      const { format, maxSize, maxWidth, maxHeight } = this.schema
+      if (maxSize) {
+        const isLt2M = file.size / 1024 / 1024 < maxSize
+        if (!isLt2M) {
+          this.$message.error(`上传大小不能超过 ${maxSize}MB`)
+          return false
+        }
+      }
+
+      if (format === 'image' && (maxWidth || maxHeight)) {
+        return this.validateSize(file, maxWidth, maxHeight)
+      }
+
       if (typeof this.schema.fileValidator !== 'function') {
         return
       }
