@@ -1,5 +1,5 @@
 <template>
-  <div v-if="value || !schema.readonly" :class="['fm-image__root', { 'fm-image--uploaded': schema.readonly || value }]">
+  <div v-if="url || !schema.readonly" :class="['fm-image__root', { 'fm-image--uploaded': schema.readonly || url }]">
     <el-upload
       ref="upload"
       :action="schema.action || ''"
@@ -22,10 +22,10 @@
         :percentage="progress"
         :show-text="false"
       ></el-progress>
-      <i v-if="!schema.readonly && !value" class="el-icon-plus" />
+      <i v-if="!schema.readonly && !url" class="el-icon-plus" />
       <div v-else ref="box" class="fm-image__box">
-        <img v-if="schema.format === 'image'" :src="value" />
-        <video v-else :src="value">您的浏览器不支持 video 标签</video>
+        <img v-if="schema.format === 'image'" :src="url" />
+        <video v-else :src="url">您的浏览器不支持 video 标签</video>
         <el-row type="flex" justify="center" @click.native.stop>
           <el-col :span="6">
             <i class="el-icon-zoom-in" @click="onPreview" />
@@ -40,8 +40,8 @@
       </div>
     </el-upload>
     <el-dialog class="fm-image__preview" :visible.sync="preview" append-to-body>
-      <img v-if="schema.format === 'image'" width="100%" :src="value" />
-      <video v-else :src="value" controls>您的浏览器不支持 video 标签</video>
+      <img v-if="schema.format === 'image'" width="100%" :src="url" />
+      <video v-else :src="url" controls>您的浏览器不支持 video 标签</video>
     </el-dialog>
   </div>
 </template>
@@ -54,7 +54,7 @@ export default {
       required: true
     },
     value: {
-      type: String,
+      type: [String, Object],
       default: undefined
     }
   },
@@ -62,6 +62,11 @@ export default {
     return {
       progress: 0,
       preview: false // 是否显示预览界面
+    }
+  },
+  computed: {
+    url() {
+      return this.value && this.value.url ? this.value.url : this.value
     }
   },
   methods: {

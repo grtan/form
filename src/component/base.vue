@@ -145,7 +145,7 @@ export default {
       required: true
     },
     value: {
-      type: [String, Number, Boolean, Array],
+      type: [String, Number, Boolean, Array, Object],
       default: undefined
     }
   }

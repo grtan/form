@@ -62,8 +62,8 @@
 <script>
 import { editor, MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api'
 import { debounce } from 'lodash-es'
-import VcForm from 'vcform'
-// import VcForm from '../../../src/index'
+// import VcForm from 'vcform'
+import VcForm from '../../../src/index'
 
 const monaco = { editor, MarkerSeverity }
 const code = (function () {
@@ -73,7 +73,7 @@ const code = (function () {
       title: '根对象',
       description: '整个表单',
       type: 'object',
-      required: ['key1', 'key5', 'key2', 'key3', 'key6', 'key23'],
+      required: ['key1', 'key5', 'key2', 'key3', 'key6', 'key23', 'key11'],
       properties: {
         key1: {
           title: '文本',
@@ -139,14 +139,15 @@ const code = (function () {
           description: '当比例为2时隐藏',
           type: 'string',
           format: 'image',
-          action: 'http://api.vivo.xyz/mockApi/vui/api/upload/file',
+          // action: 'http://api.vivo.xyz/mockApi/vui/api/upload/file',
+          action: 'https://game-tfu.vivo.com.cn/upload',
           urlFetcher () {
             return 'https://shopstatic.vivo.com.cn/vivoshop/commodity/99/10001399_1566458712423_750x750.png'
           },
           // default: 'https://shopstatic.vivo.com.cn/vivoshop/commodity/20191216/20191216180402203875_original.jpg',
           hidden: 'data.key2===2'
         },
-        key11: {
+        videoDTO: {
           title: '视频',
           description: '当比例为2时隐藏',
           type: 'string',
@@ -154,8 +155,11 @@ const code = (function () {
           maxSize: 1,
           progressWidth: 20,
           action: 'https://game-tfu.vivo.com.cn/upload?certMode=1',
-          urlFetcher () {
-            return 'https://shopstatic.vivo.com.cn/vivoshop/commodity/99/10001399_1566458712423_750x750.png'
+          urlFetcher (file) {
+            return {
+              url: file.url,
+              test: 31
+            }
           }
         },
         key23: {

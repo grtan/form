@@ -357,6 +357,7 @@ export default {
       }
 
       this.required &&
+        !['image', 'video', 'file'].includes(format) &&
         rules.value.push({
           type: (function () {
             if (['address', 'range'].includes(type)) {
@@ -389,9 +390,13 @@ export default {
 
           // 文件校验
           if (['image', 'video', 'file'].includes(format)) {
+            const { required } = this
             rules.value.push({
               validator(rule, value, callback) {
-                if (value && value.startsWith('validate:')) {
+                value = value && value.url ? value.url : value
+                if (required && !value) {
+                  callback(new Error('请上传资源'))
+                } else if (value && value.startsWith('validate:')) {
                   callback(new Error(value.replace(/^validate:/, '')))
                 } else {
                   callback()
