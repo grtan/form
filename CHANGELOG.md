@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0-beta.0](https://gitlab.vmic.xyz///compare/v1.2.0-beta.5...v1.3.0-beta.0) (2021-03-31)
+
+
+### Features
+
+* 上传组件允许返回对象 ([c4fec06](https://gitlab.vmic.xyz///commit/c4fec066e23ee5391633019f9190461a73134c96))
+
 ## [1.2.0](https://gitlab.vmic.xyz///compare/v1.2.0-beta.5...v1.2.0) (2021-03-31)
 
 
