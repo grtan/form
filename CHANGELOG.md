@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0-beta.1](https://gitlab.vmic.xyz///compare/v1.3.0-beta.0...v1.3.0-beta.1) (2021-04-01)
+
+
+### Features
+
+* 上传尺寸判断调整 ([fb94b1d](https://gitlab.vmic.xyz///commit/fb94b1d19dbe2c453ed98e3fba7703462054e026))
+
 ## [1.3.0-beta.0](https://gitlab.vmic.xyz///compare/v1.2.0-beta.5...v1.3.0-beta.0) (2021-03-31)
 
 
