@@ -73,6 +73,24 @@ export default {
     onValidateFail(reason) {
       reason && this.$emit('input', `validate:${reason}`)
     },
+    eval(fn) {
+      const Fn = Function
+      return new Fn('return ' + fn)()
+    },
+    calculateSize(size, maxSize, type) {
+      maxSize = Number.isFinite(maxSize) ? `<${maxSize}` : maxSize
+      if (!this.eval(size + (maxSize.startsWith('=') ? '=' : '') + maxSize)) {
+        return `,${type}应${maxSize}px`
+      }
+      return ''
+    },
+    validateMsg(width, height, maxWidth, maxHeight) {
+      const msg =
+        (maxWidth ? this.calculateSize(width, maxWidth, '宽度') : '') +
+        (maxHeight ? this.calculateSize(height, maxHeight, '高度') : '')
+
+      return msg ? `图片尺寸不正确${msg}` : ''
+    },
     validateSize(file, maxWidth, maxHeight) {
       const reader = new FileReader()
       return new Promise((resolve, reject) => {
@@ -81,15 +99,8 @@ export default {
           const image = new Image()
           image.onload = () => {
             const { width, height } = image
-            if (maxWidth && maxHeight && (width > maxWidth || height > maxHeight)) {
-              reject(this.$message.error(`图片尺寸不能超过${maxWidth} * ${maxHeight}px`))
-            } else if (maxWidth && width > maxWidth) {
-              reject(this.$message.error(`图片宽度不能超过${maxWidth}px`))
-            } else if (maxHeight && height > maxHeight) {
-              reject(this.$message.error(`图片高度不能超过${maxHeight}px`))
-            } else {
-              resolve({ width, height })
-            }
+            const _message = this.validateMsg(width, height, maxWidth, maxHeight)
+            _message ? reject(this.$message.error(_message)) : resolve({ width, height })
           }
           image.src = data
         }
