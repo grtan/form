@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0-beta.2](https://gitlab.vmic.xyz///compare/v1.3.0-beta.1...v1.3.0-beta.2) (2021-04-10)
+
+
+### Bug Fixes
+
+* 单选、多选时去掉tooltip提示；修复表单项按enter键时自动提交的问题 ([81dd777](https://gitlab.vmic.xyz///commit/81dd77776c5bd6aed7f74853b73fc3752833c143))
+
 ## [1.3.0-beta.1](https://gitlab.vmic.xyz///compare/v1.3.0-beta.0...v1.3.0-beta.1) (2021-04-01)
 
 
