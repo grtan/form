@@ -3,22 +3,37 @@
   "files.insertFinalNewline": true,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": true
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "prettier.configPath": "",
-  "prettier.disableLanguages": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "css",
-    "vue"
-  ],
+  "[javascript]": {
+    "editor.defaultFormatter": null
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": null
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": null
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": null
+  },
+  "[css]": {
+    "editor.defaultFormatter": null
+  },
+  "[less]": {
+    "editor.defaultFormatter": null
+  },
+  "[vue]": {
+    "editor.defaultFormatter": null
+  },
   "javascript.format.enable": false,
   "typescript.format.enable": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "css.validate": false,
+  "less.validate": false,
   "vetur.format.enable": false,
   "eslint.nodePath": "",
   "eslint.options": {

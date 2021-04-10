@@ -1,7 +1,7 @@
 <template>
   <!-- select多选、单选 -->
   <el-select
-    v-if="!isFetch&&schema.component==='select'"
+    v-if="!isFetch && schema.component === 'select'"
     class="fm-enum__root"
     :multiple="isMultiple"
     :multiple-limit="schema.maxItems"
@@ -10,16 +10,11 @@
     :value="fixedValue"
     @input="onInput"
   >
-    <el-option
-      v-for="({label,value:itemValue},index) in options"
-      :key="index"
-      :label="label"
-      :value="itemValue"
-    />
+    <el-option v-for="({ label, value: itemValue }, index) in options" :key="index" :label="label" :value="itemValue" />
   </el-select>
   <!-- checkbox多选 -->
   <el-checkbox-group
-    v-else-if="!isFetch&&isMultiple"
+    v-else-if="!isFetch && isMultiple"
     class="fm-enum__root"
     :disabled="schema.readonly"
     :min="schema.minItems"
@@ -27,54 +22,41 @@
     :value="fixedValue"
     @input="onInput"
   >
-    <el-checkbox
-      v-for="({name,label,value:itemValue},index) in options"
-      :key="index"
-      :label="itemValue"
-    >
+    <el-checkbox v-for="({ label, value: itemValue }, index) in options" :key="index" :label="itemValue">
       <!-- color -->
-      <el-tooltip
-        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['color'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="String(itemValue)"
-        :disabled="!name"
-        placement="bottom"
+      <span
+        v-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['color'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :style="{ color: itemValue }"
+        >{{ label }}</span
       >
-        <span :style="{color:itemValue}">{{ label }}</span>
-      </el-tooltip>
 
       <!-- image、video -->
-      <el-tooltip
-        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['image','video'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="label"
-        placement="bottom"
-      >
-        <v-image :schema="{...(isMultiple?schema.items:schema),readonly:true}" :value="itemValue" />
-      </el-tooltip>
+      <v-image
+        v-else-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['image', 'video'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :schema="{ ...(isMultiple ? schema.items : schema), readonly: true }"
+        :value="itemValue"
+      />
 
       <!-- file -->
-      <el-tooltip
-        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="String(itemValue)"
-        :disabled="!name"
-        placement="bottom"
+      <el-link
+        v-else-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['file'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :href="itemValue"
+        target="_blank"
       >
-        <el-link
-          :href="itemValue"
-          target="_blank"
-        >
-          {{ label }}
-        </el-link>
-      </el-tooltip>
+        {{ label }}
+      </el-link>
 
       <!-- 其他 -->
-      <el-tooltip
-        v-else
-        :content="isBaseData?String(itemValue):JSON.stringify(schema.enum[index].value)"
-        :disabled="!name"
-        placement="bottom"
-      >
-        <span>{{ label }}</span>
-      </el-tooltip>
+      <span v-else>{{ label }}</span>
     </el-checkbox>
   </el-checkbox-group>
   <!-- radio单选 -->
@@ -85,83 +67,78 @@
     :value="fixedValue"
     @input="onInput"
   >
-    <el-radio
-      v-for="({name,label,value:itemValue},index) in options"
-      :key="index"
-      :label="itemValue"
-    >
+    <el-radio v-for="({ label, value: itemValue }, index) in options" :key="index" :label="itemValue">
       <!-- color -->
-      <el-tooltip
-        v-if="(isMultiple?schema.items.type:schema.type)==='string'&&['color'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="String(itemValue)"
-        :disabled="!name"
-        placement="bottom"
+      <span
+        v-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['color'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :style="{ color: itemValue }"
+        >{{ label }}</span
       >
-        <span :style="{color:itemValue}">{{ label }}</span>
-      </el-tooltip>
 
       <!-- image、video -->
-      <el-tooltip
-        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['image','video'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="label"
-        placement="bottom"
-      >
-        <v-image :schema="{...(isMultiple?schema.items:schema),readonly:true}" :value="itemValue" />
-      </el-tooltip>
+      <v-image
+        v-else-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['image', 'video'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :schema="{ ...(isMultiple ? schema.items : schema), readonly: true }"
+        :value="itemValue"
+      />
 
       <!-- file -->
-      <el-tooltip
-        v-else-if="(isMultiple?schema.items.type:schema.type)==='string'&&['file'].includes(isMultiple?schema.items.format:schema.format)"
-        :content="String(itemValue)"
-        :disabled="!name"
-        placement="bottom"
+      <el-link
+        v-else-if="
+          (isMultiple ? schema.items.type : schema.type) === 'string' &&
+          ['file'].includes(isMultiple ? schema.items.format : schema.format)
+        "
+        :href="itemValue"
+        target="_blank"
       >
-        <el-link
-          :href="itemValue"
-          target="_blank"
-        >
-          {{ label }}
-        </el-link>
-      </el-tooltip>
+        {{ label }}
+      </el-link>
 
       <!-- 其他 -->
-      <el-tooltip
-        v-else
-        :content="isBaseData?String(itemValue):JSON.stringify(schema.enum[index].value)"
-        :disabled="!name"
-        placement="bottom"
-      >
-        <span>{{ label }}</span>
-      </el-tooltip>
+      <span v-else>{{ label }}</span>
     </el-radio>
   </el-radio-group>
   <!-- 通过接口查询 -->
   <div v-else class="fm-enum__root fm-enum--fetch">
-    <div v-if="properties.length===1&&list.length" class="fm-enum__list">
-      <div v-for="(item,index) in list" :key="index" class="fm-enum__item">
+    <div v-if="properties.length === 1 && list.length" class="fm-enum__list">
+      <div v-for="(item, index) in list" :key="index" class="fm-enum__item">
         <component
-          :is="typeof schema.enum.properties[properties[0]].component==='function'?schema.enum.properties[properties[0]].component():'v-base'"
-          :schema="{...schema.enum.properties[properties[0]],readonly:true}"
+          :is="
+            typeof schema.enum.properties[properties[0]].component === 'function'
+              ? schema.enum.properties[properties[0]].component()
+              : 'v-base'
+          "
+          :schema="{ ...schema.enum.properties[properties[0]], readonly: true }"
           :value="list[index][properties[0]]"
-          @input="()=>{}"
+          @input="() => {}"
         />
-        <el-button type="text" @click="onDelete(index)">
-          删除
-        </el-button>
+        <el-button type="text" @click="onDelete(index)"> 删除 </el-button>
       </div>
     </div>
     <!-- 这里对table使用key，是因为值不同时，高度要自适应 -->
-    <el-table v-else-if="properties.length>1&&list.length" :key="JSON.stringify(list)" class="fm-enum__list" :data="list" height="auto">
+    <el-table
+      v-else-if="properties.length > 1 && list.length"
+      :key="JSON.stringify(list)"
+      class="fm-enum__list"
+      :data="list"
+      height="auto"
+    >
       <template v-for="prop in properties">
         <el-table-column
-          v-if="schema.enum.properties[prop].showInTable===undefined||schema.enum.properties[prop].showInTable"
+          v-if="schema.enum.properties[prop].showInTable === undefined || schema.enum.properties[prop].showInTable"
           :key="prop"
           :label="schema.enum.properties[prop].title"
-          v-bind="schema.enum.properties[prop].tableColumn||{}"
+          v-bind="schema.enum.properties[prop].tableColumn || {}"
         >
           <component
             :is="schema.enum.properties[prop].displayComponent()"
-            v-if="typeof schema.enum.properties[prop].displayComponent==='function'"
+            v-if="typeof schema.enum.properties[prop].displayComponent === 'function'"
             slot-scope="scope"
             :schema="schema.enum.properties[prop]"
             :value="scope.row[prop]"
@@ -169,83 +146,16 @@
           <v-display v-else slot-scope="scope" :schema="schema.enum.properties[prop]" :value="scope.row[prop]" />
         </el-table-column>
       </template>
-      <el-table-column
-        align="center"
-        label="操作"
-        fixed="right"
-      >
-        <el-button slot-scope="scope" type="text" @click="onDelete(scope.$index)">
-          删除
-        </el-button>
+      <el-table-column align="center" label="操作" fixed="right">
+        <el-button slot-scope="scope" type="text" @click="onDelete(scope.$index)"> 删除 </el-button>
       </el-table-column>
     </el-table>
-    <el-button type="primary" @click="show=true">
-      选择
-    </el-button>
+    <el-button type="primary" @click="show = true"> 选择 </el-button>
     <el-dialog class="fm-enum__dialog" :visible.sync="show" width="75%" append-to-body>
       <v-list :schema="getListSchema(schema.enum)" />
     </el-dialog>
   </div>
 </template>
-
-<style lang="less">
-.fm-enum {
-  &__root {
-    &.fm-enum--fetch {
-      display: flex;
-      align-items: flex-start;
-
-      > .el-button {
-        flex: none;
-      }
-    }
-
-    .el-radio {
-      margin-top: 5px;
-      margin-bottom: 5px;
-      font-size: 0;
-
-      .el-radio__label {
-        display: inline-block;
-        vertical-align: middle;
-      }
-    }
-  }
-
-  &__list {
-    flex: auto;
-    margin-right: 2em;
-
-    &.el-table {
-      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    }
-  }
-
-  &__item {
-    display: flex;
-    align-items: center;
-
-    &:not(:first-child) {
-      margin-top: 0.7em;
-    }
-
-    > .el-button:last-child {
-      margin-left: 1em;
-    }
-  }
-
-  &__dialog {
-    > .el-dialog {
-      > .el-dialog__body {
-        > .fm-list__root {
-          max-height: 65vh;
-          min-height: 45vh;
-        }
-      }
-    }
-  }
-}
-</style>
 
 <script>
 import axios from '../util/axios'
@@ -257,12 +167,12 @@ import VDisplay from './list/display'
 
 export default {
   components: {
-    VBase (resolve) {
+    VBase(resolve) {
       resolve(VBase)
     },
     VImage,
     VDisplay,
-    VList (resolve) {
+    VList(resolve) {
       resolve(VList)
     }
   },
@@ -276,7 +186,7 @@ export default {
       default: undefined
     }
   },
-  data () {
+  data() {
     return {
       show: false,
       list: []
@@ -284,18 +194,18 @@ export default {
   },
   computed: {
     // 是否多选
-    isMultiple () {
+    isMultiple() {
       return this.schema.type === 'array'
     },
     // 是否为基础数据类型
-    isBaseData () {
+    isBaseData() {
       return ['string', 'number', 'boolean'].includes(this.isMultiple ? this.schema.items.type : this.schema.type)
     },
     // 是否从接口获取数据，为true时只支持string,number,boolean基础数据类型，为false时支持所有数据类型
-    isFetch () {
+    isFetch() {
       return !(this.schema.enum instanceof Array)
     },
-    options () {
+    options() {
       const options = []
 
       this.schema.enum.forEach(({ name, value }, index) => {
@@ -309,7 +219,7 @@ export default {
       return options
     },
     // 主属性
-    primary () {
+    primary() {
       if (!this.isFetch) {
         return
       }
@@ -325,18 +235,18 @@ export default {
       return primary
     },
     // 从列表中选择数据后在form表单项中显示的属性列表
-    properties () {
+    properties() {
       if (!this.isFetch) {
         return []
       }
 
-      return Object.keys(this.schema.enum.properties).filter((prop) => {
+      return Object.keys(this.schema.enum.properties).filter(prop => {
         const { primary, showInFormItem } = this.schema.enum.properties[prop]
 
         return (primary && showInFormItem === undefined) || showInFormItem
       })
     },
-    fixedValue () {
+    fixedValue() {
       if (this.isFetch) {
         return
       }
@@ -345,7 +255,7 @@ export default {
         const indexs = []
         const values = this.isMultiple ? this.value : [this.value]
 
-        values.forEach((value) => {
+        values.forEach(value => {
           const index = this.findIndex(this.schema.enum, value)
 
           indexs.push(index !== -1 ? index : undefined)
@@ -361,7 +271,7 @@ export default {
     value: {
       immediate: true,
       deep: true,
-      handler () {
+      handler() {
         if (!this.isFetch) {
           return
         }
@@ -385,27 +295,32 @@ export default {
         }
 
         // 重新请求数据
-        this.schema.enum.query({
-          [this.primary]: this.isMultiple ? [...this.value] : this.value
-        }, axios, ({ list }) => {
-          this.list = list.slice(0, this.isMultiple ? this.value.length : 1)
-        })
+        this.schema.enum.query(
+          {
+            [this.primary]: this.isMultiple ? [...this.value] : this.value
+          },
+          axios,
+          ({ list }) => {
+            this.list = list.slice(0, this.isMultiple ? this.value.length : 1)
+          }
+        )
       }
     }
   },
   methods: {
-    findIndex (list, data) {
+    findIndex(list, data) {
       return list.findIndex(function ({ value }) {
         return JSON.stringify(value) === JSON.stringify(data)
       })
     },
     // 获取list组件schema
-    getListSchema (schema) {
+    getListSchema(schema) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this
       const Select = {
         ...VSelect,
         methods: {
-          onClick () {
+          onClick() {
             self.show = false
 
             if (!self.isMultiple) {
@@ -418,6 +333,7 @@ export default {
               return
             }
 
+            // eslint-disable-next-line vue/no-mutating-props
             self.value.push(this.row[self.primary])
           }
         }
@@ -425,7 +341,7 @@ export default {
 
       return {
         ...schema,
-        rowOperations () {
+        rowOperations() {
           const components = [Select]
 
           if (typeof schema.rowOperations === 'function') {
@@ -437,7 +353,7 @@ export default {
       }
     },
     // isFetch为false时调用
-    onInput (value) {
+    onInput(value) {
       let values
 
       if (this.isBaseData) {
@@ -461,27 +377,95 @@ export default {
       }
 
       // 多选时按照UI显示来排序
-      this.value.splice(0, this.value.length, ...values.map(item => {
-        return {
-          index: this.schema.enum.findIndex(({ value }) => {
-            return JSON.stringify(value) === JSON.stringify(item)
-          }),
-          value: item
-        }
-      }).sort((a, b) => {
-        return a.index - b.index
-      }).map(({ value }) => {
-        return value
-      }))
+      // eslint-disable-next-line vue/no-mutating-props
+      this.value.splice(
+        0,
+        this.value.length,
+        ...values
+          .map(item => {
+            return {
+              index: this.schema.enum.findIndex(({ value }) => {
+                return JSON.stringify(value) === JSON.stringify(item)
+              }),
+              value: item
+            }
+          })
+          .sort((a, b) => {
+            return a.index - b.index
+          })
+          .map(({ value }) => {
+            return value
+          })
+      )
     },
     // isFetch为true时调用
-    onDelete (index) {
+    onDelete(index) {
       if (!this.isMultiple) {
         return this.$emit('input', undefined)
       }
 
+      // eslint-disable-next-line vue/no-mutating-props
       this.value.splice(index, 1)
     }
   }
 }
 </script>
+
+<style lang="less">
+.fm-enum {
+  &__root {
+    &.fm-enum--fetch {
+      align-items: flex-start;
+      display: flex;
+
+      > .el-button {
+        flex: none;
+      }
+    }
+
+    .el-radio {
+      font-size: 0;
+      margin-bottom: 5px;
+      margin-top: 5px;
+
+      .el-radio__label {
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  &__list {
+    flex: auto;
+    margin-right: 2em;
+
+    &.el-table {
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &__item {
+    align-items: center;
+    display: flex;
+
+    &:not(:first-child) {
+      margin-top: 0.7em;
+    }
+
+    > .el-button:last-child {
+      margin-left: 1em;
+    }
+  }
+
+  &__dialog {
+    > .el-dialog {
+      > .el-dialog__body {
+        > .fm-list__root {
+          max-height: 65vh;
+          min-height: 45vh;
+        }
+      }
+    }
+  }
+}
+</style>

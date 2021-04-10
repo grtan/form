@@ -16,7 +16,7 @@ tag:
     - git config user.email "${GITLAB_USER_EMAIL}"
     - git remote set-url origin https://$GITLAB_USER_NAME:$GITLAB_USER_PWD@gitlab.vmic.xyz/game-common/form.git
     - npm config set registry http://npm.vivo.com.cn/
-    - npm i -D standard-version
+    - npm i --no-save standard-version
     - npm run tag
   only:
     - master
@@ -30,7 +30,7 @@ publish-beta:
     - npm i -g npm-cli-login
     # 这里仓库地址后面不能加/，否则登录失败
     - npm-cli-login -u $NPM_USER_NAME -p $NPM_USER_PWD -e $NPM_USER_EMAIL -r http://npm.vivo.com.cn
-    - npm i
+    - npm ci
     - npm publish --tag beta --unsafe-perm
   only:
     - tags
@@ -47,7 +47,7 @@ publish:
     - npm i -g npm-cli-login
     # 这里仓库地址后面不能加/，否则登录失败
     - npm-cli-login -u $NPM_USER_NAME -p $NPM_USER_PWD -e $NPM_USER_EMAIL -r http://npm.vivo.com.cn
-    - npm i
+    - npm ci
     - npm publish --unsafe-perm
   only:
     - tags
