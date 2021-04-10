@@ -32,9 +32,10 @@ module.exports = {
     // config.resolve.alias
     //   .set('vcform', path.resolve(__dirname, '../src/index.vue'))
 
-    // config.module
-    //   .rule('eslint')
-    //   .exclude
-    //   .add(path.resolve(__dirname, '../src'))
+    config.module
+      .rule('eslint')
+      .exclude
+      .add(path.resolve(__dirname, '../src'))
+      .add(path.resolve(__dirname, '../demo'))
   }
 }
