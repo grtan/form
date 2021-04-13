@@ -14,6 +14,7 @@
     :status-icon="true"
     :show-message="isBaseUI"
     :inline-message="true"
+    @submit.native.prevent
     @validate="onValidate"
   >
     <el-form-item :label="isBaseUI ? schema.title : ''" prop="value">
@@ -771,9 +772,9 @@ export default {
   &__root {
     &.fm-item--combined {
       &:not(.fm-item--root) {
-        margin: 5px 5px 5px 0;
         border: 1px solid @normal;
         border-radius: 5px;
+        margin: 5px 5px 5px 0;
         overflow: hidden;
 
         &:hover {
@@ -799,13 +800,13 @@ export default {
 
       .el-collapse-item__header {
         border-bottom-color: #ebeef5;
+        color: inherit;
+        cursor: pointer;
+        font-size: inherit;
+        height: auto;
+        line-height: inherit;
         margin-bottom: 1em;
         padding: 0.2em 0;
-        height: auto;
-        color: inherit;
-        font-size: inherit;
-        line-height: inherit;
-        cursor: pointer;
       }
 
       .el-collapse-item.is-disabled {
@@ -813,6 +814,7 @@ export default {
           > .el-collapse-item__header {
             cursor: default;
 
+            /* stylelint-disable-next-line max-nesting-depth */
             .el-collapse-item__arrow {
               display: none;
             }
@@ -831,9 +833,10 @@ export default {
       &:not(.fm-item--root) {
         > .el-collapse-item {
           > .el-collapse-item__wrap {
+            /* stylelint-disable-next-line max-nesting-depth */
             > .el-collapse-item__content {
-              margin-left: 2em;
               font-size: inherit;
+              margin-left: 2em;
             }
           }
         }
@@ -854,15 +857,15 @@ export default {
   }
 
   &__label {
-    display: inline-block;
     box-sizing: border-box;
+    display: inline-block;
     padding-right: 12px;
     text-align: right;
 
     &::before {
+      color: #f56c6c;
       content: attr(data-required);
       margin-right: 4px;
-      color: #f56c6c;
     }
   }
 
@@ -871,10 +874,10 @@ export default {
     font-size: 0.8em;
 
     &--content {
-      margin: 0.8em 0;
       color: #bbb;
       font-size: 0.8em;
       line-height: 1;
+      margin: 0.8em 0;
     }
   }
 
