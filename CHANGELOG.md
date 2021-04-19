@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://gitlab.vmic.xyz///compare/v1.3.1-beta.0...v1.3.1) (2021-04-19)
+
+### [1.3.1-beta.0](https://gitlab.vmic.xyz///compare/v1.3.0-beta.2...v1.3.1-beta.0) (2021-04-19)
+
+
+### Bug Fixes
+
+* 修复image组件预览图片、视频尺寸过长时溢出的问题 ([f230a4b](https://gitlab.vmic.xyz///commit/f230a4b20534c7feb0e917190e2714359b6f185e))
+
 ## [1.3.0](https://gitlab.vmic.xyz///compare/v1.3.0-beta.2...v1.3.0) (2021-04-13)
 
 ## [1.3.0-beta.2](https://gitlab.vmic.xyz///compare/v1.3.0-beta.1...v1.3.0-beta.2) (2021-04-10)

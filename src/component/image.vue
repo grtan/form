@@ -40,7 +40,7 @@
       </div>
     </el-upload>
     <el-dialog class="fm-image__preview" :visible.sync="preview" append-to-body>
-      <img v-if="schema.format === 'image'" width="100%" :src="url" />
+      <img v-if="schema.format === 'image'" :src="url" />
       <video v-else :src="url" controls>您的浏览器不支持 video 标签</video>
     </el-dialog>
   </div>
@@ -172,54 +172,56 @@ export default {
   &__root {
     .el-upload {
       position: relative;
+
       .fm-image--uploaded& {
         border: none;
       }
     }
+
     .fm-circle-progress {
-      position: absolute;
-      z-index: 1;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      display: flex;
       align-items: center;
+      display: flex;
+      height: 100%;
       justify-content: center;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 1;
     }
   }
 
   &__box {
-    position: relative;
-    box-sizing: border-box;
     border: 1px solid #c0ccda;
     border-radius: 6px;
+    box-sizing: border-box;
     height: 100%;
+    position: relative;
 
     img {
-      position: absolute;
       left: 50%;
+      max-height: 100%;
+      max-width: 100%;
+      position: absolute;
       top: 50%;
       transform: translate(-50%, -50%);
-      max-width: 100%;
-      max-height: 100%;
     }
 
     video {
       display: block;
-      width: 100%;
       height: 100%;
+      width: 100%;
     }
 
     > div {
-      position: absolute;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      bottom: -1px;
       left: -1px;
+      opacity: 0;
+      position: absolute;
       right: -1px;
       top: -1px;
-      bottom: -1px;
-      border-radius: 6px;
-      background: rgba(0, 0, 0, 0.5);
-      opacity: 0;
       transition: opacity 0.3s;
 
       &:hover {
@@ -234,11 +236,23 @@ export default {
   }
 
   &__preview {
+    .el-dialog {
+      width: 70%;
+    }
+
+    .el-dialog__body {
+      align-items: center;
+      display: flex;
+      height: calc(75vh - 90px);
+      justify-content: center;
+    }
+
+    img,
     video {
-      display: block;
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: scale-down;
       outline: none;
-      width: 100%;
-      max-height: 500px;
     }
   }
 }
